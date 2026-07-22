@@ -91,12 +91,16 @@ open http://localhost:3002   # Grafana — admin / listing
 `claim_risk` · `title_quality` · `desc_complete` · `policy_clarity` · `content_efficiency`  
 Each bar has an **(i)** info tip. Details: [docs/METRICS.md](./docs/METRICS.md).
 
-## Production deploy
+## Production (live)
 
-1. Apply Render Blueprint (API + free Postgres) — see [DEPLOY.md](./docs/DEPLOY.md)  
-2. Deploy frontend on Vercel (`frontend/`, `NEXT_PUBLIC_API_URL`)  
-3. Set Render `CORS_ORIGINS` to the Vercel origin  
-4. Later: point `DATABASE_URL` at Supabase ([SUPABASE.md](./docs/SUPABASE.md))
+| | |
+| --- | --- |
+| Frontend | https://listing-claim-gate.vercel.app |
+| API | https://listing-claim-gate-api.onrender.com |
+| Health | https://listing-claim-gate-api.onrender.com/health |
+
+CORS is set to the Vercel origin. Redeploy / DB swap steps: [docs/DEPLOY.md](./docs/DEPLOY.md).  
+Later: point `DATABASE_URL` at Supabase ([docs/SUPABASE.md](./docs/SUPABASE.md)) before Render free Postgres expires.
 
 ## Academy
 
