@@ -73,7 +73,13 @@ async function request<T>(
   const access = getAccess();
   if (access) headers.set("Authorization", `Bearer ${access}`);
 
-  const res = await fetch(`${BASE}${path}`, { ...init, headers });
+  const res = await fetch(`${BASE}${path}`, { ...init, headers }).catch(() => {
+    throw new ApiError(
+      0,
+      "network_error",
+      `API unreachable (${BASE}). Start backend: docker compose up -d  or  cd backend && go run ./cmd/server`,
+    );
+  });
 
   if (res.status === 401 && retry && getRefresh()) {
     const refreshed = await tryRefresh();

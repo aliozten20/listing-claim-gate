@@ -63,11 +63,11 @@ export function AppShell() {
           <div className="flex items-center gap-2 shrink-0">
             <span
               className="grid place-items-center size-7 rounded-md font-bold text-sm"
-              style={{ background: "var(--accent)", color: "#06122b" }}
+              style={{ background: "var(--accent)", color: "#ecfdf5" }}
             >
               LG
             </span>
-            <span className="font-semibold text-sm hidden sm:block truncate">
+            <span className="font-semibold text-sm hidden sm:block truncate display">
               Listing Gate
             </span>
           </div>

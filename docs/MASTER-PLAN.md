@@ -262,3 +262,16 @@ Cursor’da paralel / ayrı agent çalıştırırken:
 3. shadcn’i mevcut custom CSS’in üstüne mi ekleyelim, yoksa mevcut card/btn token’larıyla mı devam?  
 
 Onay → Faz 2 backend + Faz 3 Gate koduna geçilir.
+
+## 11) Ops truth
+
+| Item | Status |
+|---|---|
+| MCP during feature coding | No — deploy-time (Render/Vercel/Academy) |
+| Docker | `docker compose up --build` (Postgres + backend) |
+| Supabase | Optional Postgres URL only; Auth stays on Go |
+| Prompts & API keys in DB | `003_settings.sql` + CONFIG-DB.md (CRUD next) |
+
+Defaults: Gate **Mock**; analyze **listing-rules-v1**; UI **Editorial Commerce Ledger** (not reference clone).
+
+Also see [CONFIG-DB.md](./CONFIG-DB.md).

@@ -1,30 +1,22 @@
 ---
-description: Capstone scope, architecture, and non-negotiables
+description: Capstone scope — Gate product, no reference UI cloning
 alwaysApply: true
 ---
 
-# LLM Monitoring Capstone
+# Listing & Claim Gate
 
-MasterFabric Academy base case: **Raw LLM Monitoring + Deci.Scoring**.
+Product: marketplace listing title/description → Deci.Scoring → PASS/REVIEW/REJECT.
+Stack: MF-style Go backend + Next SPA + Docker Compose (Postgres/API). Inference target: MLC container later.
 
-## Architecture
+## Non-negotiables
 
-- Monorepo: `frontend/` (Next.js SPA → Vercel), `backend/` (Go + Postgres → Render)
-- Inference is **browser-only** via `@mlc-ai/web-llm` (Gemma). Backend never calls a model.
-- Backend records raw runs, scores them, serves auth/config/metrics.
+- Do not clone reference-project UI (DeciMind / TicketLens / mf-academy skins).
+- Follow `.cursor/rules/frontend-design.mdc` visual system.
+- Prompts, model id, and API secrets belong in DB (`system_prompts`, `app_settings`, `app_secrets`) — not hardcoded long-term.
+- Mock + Manual Gate before real marketplace keys.
+- ≥20 Go endpoints; auth stays on Go (Supabase = optional Postgres host only).
 
-## Assignment checklist
+## Ops truth
 
-- Next.js SPA, ≥3 master views (Auth + Playground + Monitoring), auth subviews
-- Web MLC-LLM + Gemma keyword path
-- Go API ≥20 endpoints: Config[2] + Auth[8+] + WEB MLC-LLM[6–8] + Common
-- Live deploys: Vercel FE + Render BE
-- MCP workflow: Render + Vercel + MF Academy
-
-## Do / Don't
-
-- DO keep scoring rule-based and transparent (breakdown + rationale)
-- DO scope all LLM data per authenticated user
-- DON'T add server-side LLM proxy as the primary path
-- DON'T invent endpoints outside Config/Auth/LLM/Common without updating README
-- Prefer patterns from the reference repo structure over greenfield redesigns
+- MCP (Render/Vercel/Academy) used at **deploy** time, not required for local Gate coding.
+- Local: `docker compose up --build` for API+DB; frontend `npm run dev`.

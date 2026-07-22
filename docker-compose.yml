@@ -1,0 +1,48 @@
+# Local stack: Postgres + Go API (+ optional Grafana later)
+# Usage: docker compose up --build
+#
+# Frontend still runs on host: cd frontend && npm run dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: listing
+      POSTGRES_PASSWORD: listing
+      POSTGRES_DB: listing_claim_gate
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U listing -d listing_claim_gate"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    environment:
+      APP_ENV: development
+      PORT: "8080"
+      DATABASE_URL: postgres://listing:listing@postgres:5432/listing_claim_gate?sslmode=disable
+      JWT_SECRET: dev-insecure-secret-change-me-but-32b-min!!
+      CORS_ORIGINS: http://localhost:3000
+      TRUST_PROXY: "false"
+      REQUEST_TIMEOUT: 15s
+      BCRYPT_COST: "12"
+      APP_NAME: Listing & Claim Gate
+      APP_VERSION: "0.1.0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Optional observability — enable when metrics endpoint lands
+  # grafana:
+  #   image: grafana/grafana:11.2.0
+  #   ports: ["3001:3000"]
+
+volumes:
+  pgdata:

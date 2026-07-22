@@ -111,7 +111,7 @@ export function GateView() {
               className="px-3 py-1.5 rounded-md text-sm font-semibold transition-colors"
               style={{
                 background: mode === m.id ? "var(--accent)" : "transparent",
-                color: mode === m.id ? "#06122b" : "var(--text-dim)",
+                color: mode === m.id ? "#ecfdf5" : "var(--text-dim)",
               }}
             >
               {m.label}

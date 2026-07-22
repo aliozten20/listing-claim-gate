@@ -1,30 +1,35 @@
 @import "tailwindcss";
 
 /*
-  MasterFabric — Raw LLM Monitoring & Decision Scoring
-  A focused, instrument-panel aesthetic: deep slate canvas, a single electric
-  accent, monospace numerics for a "telemetry" feel.
+  Listing & Claim Gate — "Editorial Commerce Ledger"
+  Original direction (NOT MasterFabric slate clone):
+  cool stone canvas, charcoal ink, teal decision accent,
+  Fraunces display + DM Sans UI (loaded from layout).
 */
 
 :root {
-  --bg: #0b0f17;
-  --bg-elev: #121826;
-  --bg-elev-2: #182031;
-  --border: #223049;
-  --text: #e7ecf3;
-  --text-dim: #94a3b8;
-  --text-faint: #64748b;
-  --accent: #4f8cff;
-  --accent-soft: #1e2a45;
-  --good: #34d399;
-  --warn: #fbbf24;
-  --bad: #f87171;
-  --radius: 12px;
+  --bg: #e8eef2;
+  --bg-elev: #f4f7f9;
+  --bg-elev-2: #ffffff;
+  --border: #c9d4dc;
+  --text: #14181f;
+  --text-dim: #4a5563;
+  --text-faint: #7a8694;
+  --accent: #0f766e;
+  --accent-soft: #ccfbf1;
+  --good: #059669;
+  --warn: #d97706;
+  --bad: #e11d48;
+  --radius: 14px;
+  --shadow: 0 1px 0 rgba(20, 24, 31, 0.04), 0 12px 32px rgba(15, 118, 110, 0.06);
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-accent: var(--accent);
+  --font-sans: var(--font-sans);
 }
 
 * {
@@ -35,10 +40,12 @@ html,
 body {
   padding: 0;
   margin: 0;
-  background: var(--bg);
+  background:
+    radial-gradient(900px 420px at 10% -10%, rgba(15, 118, 110, 0.09), transparent 55%),
+    radial-gradient(700px 380px at 100% 0%, rgba(217, 119, 6, 0.06), transparent 50%),
+    var(--bg);
   color: var(--text);
-  font-family:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -47,12 +54,16 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Reusable surface + control primitives ------------------------------- */
+.display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
 
 .card {
-  background: var(--bg-elev);
+  background: var(--bg-elev-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
 
 .btn {
@@ -60,8 +71,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 10px;
-  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  padding: 0.65rem 1.15rem;
   font-weight: 600;
   font-size: 0.9rem;
   border: 1px solid transparent;
@@ -69,7 +80,8 @@ body {
   transition:
     background 0.15s ease,
     border-color 0.15s ease,
-    opacity 0.15s ease;
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .btn:disabled {
   opacity: 0.5;
@@ -77,10 +89,11 @@ body {
 }
 .btn-primary {
   background: var(--accent);
-  color: #06122b;
+  color: #f0fdfa;
 }
 .btn-primary:hover:not(:disabled) {
-  background: #6ea0ff;
+  background: #0d9488;
+  transform: translateY(-1px);
 }
 .btn-ghost {
   background: transparent;
@@ -94,17 +107,18 @@ body {
 
 .input {
   width: 100%;
-  background: var(--bg-elev-2);
+  background: var(--bg-elev);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
   color: var(--text);
   font-size: 0.9rem;
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .input:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
 }
 .input::placeholder {
   color: var(--text-faint);
@@ -129,11 +143,10 @@ body {
   border: 1px solid var(--border);
 }
 
-/* Grade badge colours */
 .grade-A { color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, transparent); background: color-mix(in srgb, var(--good) 12%, transparent); }
-.grade-B { color: #a3e635; border-color: color-mix(in srgb, #a3e635 40%, transparent); background: color-mix(in srgb, #a3e635 12%, transparent); }
+.grade-B { color: #65a30d; border-color: color-mix(in srgb, #65a30d 40%, transparent); background: color-mix(in srgb, #65a30d 12%, transparent); }
 .grade-C { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: color-mix(in srgb, var(--warn) 12%, transparent); }
-.grade-D { color: #fb923c; border-color: color-mix(in srgb, #fb923c 40%, transparent); background: color-mix(in srgb, #fb923c 12%, transparent); }
+.grade-D { color: #ea580c; border-color: color-mix(in srgb, #ea580c 40%, transparent); background: color-mix(in srgb, #ea580c 12%, transparent); }
 .grade-F { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); background: color-mix(in srgb, var(--bad) 12%, transparent); }
 
 .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }

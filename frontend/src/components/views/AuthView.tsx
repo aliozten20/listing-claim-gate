@@ -27,7 +27,15 @@ export function AuthView() {
       else await register(email, password, name);
       // On success the AppShell re-renders into the app automatically.
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Something went wrong");
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else if (err instanceof TypeError || (err instanceof Error && /fetch|network|Failed/i.test(err.message))) {
+        setError(
+          "API’ye ulaşılamıyor. Backend’in http://localhost:8080 üzerinde çalıştığından emin olun (docker compose up veya go run).",
+        );
+      } else {
+        setError(err instanceof Error ? err.message : "Something went wrong");
+      }
     } finally {
       setBusy(false);
     }
@@ -40,20 +48,20 @@ export function AuthView() {
         className="hidden lg:flex flex-col justify-between p-12"
         style={{
           background:
-            "radial-gradient(1200px 500px at 0% 0%, #16233f 0%, var(--bg) 60%)",
+            "radial-gradient(900px 480px at 0% 0%, rgba(15,118,110,0.18) 0%, transparent 55%), linear-gradient(160deg, #dfe8ee 0%, #e8eef2 45%, #f4f7f9 100%)",
         }}
       >
         <div className="flex items-center gap-2">
           <span
             className="grid place-items-center w-9 h-9 rounded-lg font-bold"
-            style={{ background: "var(--accent)", color: "#06122b" }}
+            style={{ background: "var(--accent)", color: "#ecfdf5" }}
           >
             LG
           </span>
           <span className="font-semibold">Listing Gate</span>
         </div>
         <div className="max-w-md">
-          <h1 className="text-4xl font-bold leading-tight tracking-tight">
+          <h1 className="display text-4xl font-bold leading-tight tracking-tight">
             Listing & Claim Gate
             <br />
             <span className="text-2xl font-semibold" style={{ color: "var(--text-dim)" }}>
@@ -97,7 +105,7 @@ export function AuthView() {
                 className="px-4 py-1.5 rounded-md text-sm font-semibold capitalize transition-colors"
                 style={{
                   background: sub === s ? "var(--accent)" : "transparent",
-                  color: sub === s ? "#06122b" : "var(--text-dim)",
+                  color: sub === s ? "#ecfdf5" : "var(--text-dim)",
                 }}
               >
                 {s}
@@ -105,13 +113,13 @@ export function AuthView() {
             ))}
           </div>
 
-          <h2 className="text-2xl font-bold mb-1">
+          <h2 className="display text-2xl font-bold mb-1">
             {sub === "login" ? "Welcome back" : "Create your account"}
           </h2>
           <p className="text-sm mb-6" style={{ color: "var(--text-dim)" }}>
             {sub === "login"
-              ? "Sign in to your monitoring workspace."
-              : "Start monitoring Gemma in seconds."}
+              ? "Sign in to score marketplace listings."
+              : "Create an account to open Listing & Claim Gate."}
           </p>
 
           <form onSubmit={submit} className="space-y-4">

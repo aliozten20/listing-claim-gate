@@ -1,32 +1,41 @@
 ---
-description: Listing Gate UI — shadcn, responsive, visual consistency
+description: Original award-level UI — ban reference-project clones
 globs: frontend/**/*.{tsx,css}
 alwaysApply: false
 ---
 
-# Frontend design (Listing & Claim Gate)
+# Frontend design — Listing & Claim Gate
 
-## Sources
+## Identity: "Editorial Commerce Ledger"
 
-- Follow shadcn/ui compose rules: use primitives first, `gap-*` not `space-y-*`,
-  semantic tokens, no manual purple “AI slop” themes.
-- App shell (not a marketing landing): Gate / Monitoring density over hero chrome.
-- Illustrations only from `public/illustrations/` using docs/ILLUSTRATIONS.md prompts.
+Do **not** copy MasterFabric / reference-repo aesthetics (deep navy `#0b0f17`,
+electric `#4f8cff`, monospace telemetry clone, MF badge chrome).
 
-## Responsive
+Use this system instead:
 
-- Mobile-first. Gate: tabs stack; result below form on `<md`, split on `md+`.
-- Monitoring: 2-col metrics on mobile, up to 6 on `lg`.
-- Nav: collapse labels on small screens; keep touch targets ≥44px.
+| Token | Value | Role |
+| --- | --- | --- |
+| Canvas | `#E8EEF2` + soft teal/amber washes | Cool stone, not cream |
+| Surface | `#FFFFFF` / `#F4F7F9` | Cards |
+| Ink | `#14181F` | Text |
+| Accent | `#0F766E` teal | CTA / focus |
+| Type | Fraunces (display) + DM Sans (UI) | Distinctive, not Inter |
 
-## Gate UX
+Inspiration lane (study structure, do not copy assets): Awwwards / CSS Design
+Awards commerce-ops and fintech dashboards — editorial type, clear hierarchy,
+generous whitespace, one accent, decisive status color.
 
-- Two modes only for now: **Mock** (fetch products → analyze) and **Manual** (title+desc).
-- Always show publish decision badge: PASS / REVIEW / REJECT.
-- Pair ScoreCard with EfficiencyPanel when analysis returns efficiency_analysis.
+## Rules
 
-## Do not
+- Responsive mobile-first; Gate stacks under `md`, splits on `md+`.
+- Prefer `gap-*` stacks; pill CTAs OK for this brand (commerce soft).
+- Status colors: PASS teal/green, REVIEW amber, REJECT rose — never purple glow.
+- Illustrations only via `docs/ILLUSTRATIONS.md` master pack (updated palette).
+- Empty states: one quiet panel + short copy; no decorative card grids.
 
-- Cards-for-decoration in empty states beyond one quiet panel.
-- Inconsistent illustration styles or huge hero images.
-- Platform-specific forms (Trendyol fields) until real adapters land.
+## Anti-patterns
+
+- Slate-on-navy instrument panels from academy sample repos
+- Purple gradients, neon glow, glassmorphism stacks
+- Warm cream + terracotta “AI default” landing looks
+- Inset hero media cards on app shell screens
