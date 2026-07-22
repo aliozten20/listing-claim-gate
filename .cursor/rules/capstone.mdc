@@ -1,22 +1,24 @@
 ---
-description: Capstone scope — Gate product, no reference UI cloning
+description: Capstone — e-commerce SaaS Gate; Docker+Supabase+Grafana+MLC
 alwaysApply: true
 ---
 
-# Listing & Claim Gate
+# Listing & Claim Gate (e-commerce SaaS)
 
-Product: marketplace listing title/description → Deci.Scoring → PASS/REVIEW/REJECT.
-Stack: MF-style Go backend + Next SPA + Docker Compose (Postgres/API). Inference target: MLC container later.
+## Product surface
 
-## Non-negotiables
+- **Auth** (login/register) — Academy `[Auth][Subviews]`
+- **Listing Gate** — Mock + Manual → PASS/REVIEW/REJECT
+- **Decisions** — score history
+- **i18n** — EN default, TR toggle
 
-- Do not clone reference-project UI (DeciMind / TicketLens / mf-academy skins).
-- Follow `.cursor/rules/frontend-design.mdc` visual system.
-- Prompts, model id, and API secrets belong in DB (`system_prompts`, `app_settings`, `app_secrets`) — not hardcoded long-term.
-- Mock + Manual Gate before real marketplace keys.
-- ≥20 Go endpoints; auth stays on Go (Supabase = optional Postgres host only).
+## Infra
 
-## Ops truth
+- Docker Compose: postgres + backend; `--profile full` adds MLC stub + Prometheus + Grafana
+- Production DB: **Supabase** (`DATABASE_URL`); Auth stays on Go
+- Deploy: Vercel FE + Render API — see `docs/DEPLOY.md`
 
-- MCP (Render/Vercel/Academy) used at **deploy** time, not required for local Gate coding.
-- Local: `docker compose up --build` for API+DB; frontend `npm run dev`.
+## Forbidden leftovers
+
+- No LLM Lab / WebLLM playground tab
+- No MF navy instrument-panel clone
