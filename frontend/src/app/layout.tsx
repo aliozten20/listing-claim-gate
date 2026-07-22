@@ -3,9 +3,9 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "LLM Monitoring & Deci.Scoring",
+  title: "Listing & Claim Gate",
   description:
-    "Monitor a Gemma model running in your browser via WebLLM and score its decisions.",
+    "Analyze marketplace listing titles and descriptions with Deci.Scoring publish decisions.",
 };
 
 export default function RootLayout({

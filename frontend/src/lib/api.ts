@@ -10,6 +10,9 @@ import type {
   ModelInfo,
   CreateRunPayload,
   Score,
+  CanonicalProduct,
+  AnalyzeListingResult,
+  AnalyzeListingPayload,
 } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
@@ -161,4 +164,20 @@ export const api = {
   scoreRun: (id: string) =>
     request<Score>(`/llm/runs/${id}/score`, { method: "POST" }),
   metrics: () => request<Metrics>("/llm/metrics"),
+
+  // ---- listings gate ----
+  mockProducts: () =>
+    request<{
+      platform: string;
+      count: number;
+      products: CanonicalProduct[];
+      note?: string;
+    }>("/llm/listings/mock/products"),
+  mockProduct: (id: string) =>
+    request<CanonicalProduct>(`/llm/listings/mock/products/${id}`),
+  analyzeListing: (payload: AnalyzeListingPayload) =>
+    request<AnalyzeListingResult>("/llm/listings/analyze", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
 };

@@ -137,3 +137,47 @@ export interface CreateRunPayload {
   metadata?: Record<string, unknown>;
   auto_score?: boolean;
 }
+
+// ---- Listing & Claim Gate ----
+
+export interface ProductAttr {
+  key: string;
+  value: string;
+}
+
+export interface CanonicalProduct {
+  external_id: string;
+  platform: string;
+  shop_id: string;
+  sku: string;
+  title: string;
+  description_text: string;
+  brand?: string;
+  category_path?: string[];
+  attributes?: ProductAttr[];
+  claims_hint?: string[];
+  locale: string;
+  synced_at: string;
+}
+
+export type ListingDecision = "PASS" | "REVIEW" | "REJECT";
+
+export interface AnalyzeListingResult {
+  product: CanonicalProduct;
+  decision: ListingDecision;
+  flags: string[];
+  insights: string[];
+  engine: string;
+  run_id: string;
+  score?: Score | null;
+  analyzed_at: string;
+}
+
+export interface AnalyzeListingPayload {
+  source: "manual" | "mock";
+  product_id?: string;
+  title?: string;
+  description?: string;
+  platform?: string;
+  keywords?: string[];
+}

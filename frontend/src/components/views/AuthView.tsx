@@ -48,22 +48,25 @@ export function AuthView() {
             className="grid place-items-center w-9 h-9 rounded-lg font-bold"
             style={{ background: "var(--accent)", color: "#06122b" }}
           >
-            LM
+            LG
           </span>
-          <span className="font-semibold">LLM Monitoring</span>
+          <span className="font-semibold">Listing Gate</span>
         </div>
         <div className="max-w-md">
           <h1 className="text-4xl font-bold leading-tight tracking-tight">
-            Raw LLM Monitoring
-            <br />& Deci.Scoring
+            Listing & Claim Gate
+            <br />
+            <span className="text-2xl font-semibold" style={{ color: "var(--text-dim)" }}>
+              Deci.Scoring
+            </span>
           </h1>
           <p className="mt-4 text-sm leading-6" style={{ color: "var(--text-dim)" }}>
-            Run <strong>Gemma</strong> entirely in your browser with WebLLM, then
-            capture every run and grade its decisions with a transparent,
-            rule-based scoring engine.
+            Mock mağaza veya manuel title/açıklama ile listing kalitesini ölçün.
+            Yayın kararı: <strong>PASS</strong> / <strong>REVIEW</strong> /{" "}
+            <strong>REJECT</strong> — şeffaf skor kırılımı ile.
           </p>
           <div className="mt-8 flex flex-wrap gap-2">
-            {["WebGPU · in-browser", "Go + Postgres API", "A–F decision grades"].map(
+            {["Mock + Manuel", "Go + Postgres API", "A–F decision grades"].map(
               (t) => (
                 <span key={t} className="pill" style={{ color: "var(--text-dim)" }}>
                   {t}

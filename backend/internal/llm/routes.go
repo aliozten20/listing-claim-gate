@@ -23,6 +23,11 @@ func (h *Handler) Routes(verify common.TokenVerifier) http.Handler {
 		pr.Post("/runs/{id}/score", h.ScoreRun)
 		pr.Get("/runs/{id}/score", h.GetScore)
 		pr.Get("/metrics", h.Metrics)
+
+		// Listing & Claim Gate (mock marketplace + manual analyze)
+		pr.Get("/listings/mock/products", h.ListMockProducts)
+		pr.Get("/listings/mock/products/{id}", h.GetMockProduct)
+		pr.Post("/listings/analyze", h.AnalyzeListing)
 	})
 
 	return r
