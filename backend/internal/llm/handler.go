@@ -28,10 +28,16 @@ type RunStore interface {
 
 // Handler serves the LLM monitoring & decision-scoring endpoints.
 type Handler struct {
-	store RunStore
+	store     RunStore
+	onAnalyze func(decision string, latencyMs int)
 }
 
 func NewHandler(store RunStore) *Handler { return &Handler{store: store} }
+
+// SetAnalyzeHook records Gate analyze outcomes for Prometheus metrics.
+func (h *Handler) SetAnalyzeHook(fn func(decision string, latencyMs int)) {
+	h.onAnalyze = fn
+}
 
 // browserModels are the WebLLM/MLC-LLM models the frontend can run in-browser.
 // Gemma is the required model for this capstone; others are offered as options.

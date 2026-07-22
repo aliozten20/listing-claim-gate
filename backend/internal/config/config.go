@@ -33,6 +33,10 @@ type Config struct {
 	// so a throttled shared vCPU may warrant a lower setting than a dedicated
 	// one. The auth package enforces its own floor regardless of what is set.
 	BcryptCost int
+	// MLCBaseURL is the OpenAI-compatible MLC server (empty = rules-only Gate).
+	MLCBaseURL string
+	// MaxConcurrentInferences is the switch-out killer slot count (default 20).
+	MaxConcurrentInferences int
 }
 
 // InsecureDefaultSecret is the development JWT secret. It is a known constant —
@@ -62,14 +66,16 @@ func Load() Config {
 		AccessTokenTTL:  getDuration("ACCESS_TOKEN_TTL", 15*time.Minute),
 		RefreshTokenTTL: getDuration("REFRESH_TOKEN_TTL", 7*24*time.Hour),
 		CORSOrigins:     getList("CORS_ORIGINS", []string{"http://localhost:3000"}),
-		AppName:         getEnv("APP_NAME", "LLM Monitoring & Deci.Scoring"),
+		AppName:         getEnv("APP_NAME", "Listing & Claim Gate"),
 		AppVersion:      getEnv("APP_VERSION", "0.1.0"),
 		// Defaults to false: a direct-exposed process is the unsafe case, so
 		// the safe behaviour is what you get without configuring anything.
 		// Render (and any reverse proxy deployment) should set TRUST_PROXY=true.
-		TrustProxy:     getBool("TRUST_PROXY", false),
-		RequestTimeout: getDuration("REQUEST_TIMEOUT", 5*time.Second),
-		BcryptCost:     getInt("BCRYPT_COST", defaultBcryptCost),
+		TrustProxy:              getBool("TRUST_PROXY", false),
+		RequestTimeout:          getDuration("REQUEST_TIMEOUT", 5*time.Second),
+		BcryptCost:              getInt("BCRYPT_COST", defaultBcryptCost),
+		MLCBaseURL:              getEnv("MLC_BASE_URL", ""),
+		MaxConcurrentInferences: getInt("MAX_CONCURRENT_INFERENCES", 20),
 	}
 }
 
@@ -110,6 +116,9 @@ func (c Config) Validate() error {
 		if o == "*" {
 			problems = append(problems, "CORS_ORIGINS contains '*', which allows any site to call this API")
 		}
+	}
+	if c.DatabaseURL == "" {
+		problems = append(problems, "DATABASE_URL is empty (use Supabase Postgres connection string in production)")
 	}
 
 	if len(problems) > 0 {

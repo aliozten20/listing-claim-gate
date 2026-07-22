@@ -18,6 +18,7 @@ import (
 	"github.com/aliozten/llm-monitoring/backend/internal/config"
 	"github.com/aliozten/llm-monitoring/backend/internal/docs"
 	"github.com/aliozten/llm-monitoring/backend/internal/llm"
+	"github.com/aliozten/llm-monitoring/backend/internal/metrics"
 	"github.com/aliozten/llm-monitoring/backend/migrations"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -75,6 +76,15 @@ func main() {
 	llmStore := llm.NewStore(pool)
 	llmHandler := llm.NewHandler(llmStore)
 
+	reg := metrics.New(cfg.MaxConcurrentInferences)
+	llmHandler.SetAnalyzeHook(reg.ObserveAnalyze)
+
+	capacity := common.NewCapacityLimiter(
+		cfg.MaxConcurrentInferences,
+		reg.IncCapacityReject,
+		reg.SetActiveSlots,
+	)
+
 	cfgHandler := config.NewHandler(cfg)
 
 	// Background workers share one context so shutdown stops all of them.
@@ -102,6 +112,12 @@ func main() {
 	// database driver and a stalled query cannot hold a pooled connection open.
 	r.Use(common.Timeout(cfg.RequestTimeout))
 	r.Use(common.CORS(cfg.CORSOrigins))
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			reg.IncHTTP()
+			next.ServeHTTP(w, req)
+		})
+	})
 
 	// Config module
 	r.Get("/config", cfgHandler.Config)
@@ -110,6 +126,9 @@ func main() {
 	// API documentation
 	r.Get("/openapi.yaml", docs.SpecYAML)
 	r.Get("/docs", docs.Reference)
+
+	// Prometheus text metrics (scraped by Grafana)
+	r.Get("/metrics", reg.Handler())
 
 	// Common module — liveness & readiness
 	r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
@@ -122,12 +141,19 @@ func main() {
 			common.Error(w, common.ErrInternal("database unavailable"))
 			return
 		}
-		common.JSON(w, http.StatusOK, map[string]string{"status": "ready"})
+		payload := map[string]any{"status": "ready", "mlc_configured": cfg.MLCBaseURL != ""}
+		common.JSON(w, http.StatusOK, payload)
 	})
 
 	// Feature modules
 	r.Mount("/auth", authHandler.Routes(tokens.Verify, authLimiter.Middleware))
-	r.Mount("/llm", llmHandler.Routes(tokens.Verify))
+	r.Mount("/llm", llmHandler.Routes(tokens.Verify, capacity.Middleware))
+
+	if cfg.MLCBaseURL != "" {
+		slog.Info("MLC endpoint configured", "url", cfg.MLCBaseURL)
+	} else {
+		slog.Info("MLC_BASE_URL unset — Gate uses listing-rules engine; set URL to attach MLC")
+	}
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,

@@ -23,12 +23,22 @@ func (h *Handler) Config(w http.ResponseWriter, r *http.Request) {
 		"features": map[string]bool{
 			"registration":     true,
 			"decision_scoring": true,
-			"webllm":           true,
+			"listing_gate":     true,
+			"mlc_attached":     h.cfg.MLCBaseURL != "",
 		},
 		"scoring": map[string]any{
-			"type":       "rule-based",
-			"dimensions": []string{"completion", "latency", "efficiency", "keywords", "length"},
-			"grades":     []string{"A", "B", "C", "D", "F"},
+			"type": "rule-based",
+			"listing_dimensions": []string{
+				"claim_risk", "title_quality", "desc_complete",
+				"policy_clarity", "content_efficiency",
+			},
+			"llm_dimensions": []string{
+				"completion", "latency", "efficiency", "keywords", "length",
+			},
+			"grades": []string{"A", "B", "C", "D", "F"},
+		},
+		"capacity": map[string]any{
+			"max_concurrent_inferences": h.cfg.MaxConcurrentInferences,
 		},
 	})
 }

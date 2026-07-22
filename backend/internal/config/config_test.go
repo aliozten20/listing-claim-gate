@@ -10,6 +10,7 @@ func prodConfig() Config {
 	return Config{
 		Env:            "production",
 		JWTSecret:      strings.Repeat("k", 48),
+		DatabaseURL:    "postgresql://postgres:secret@db.example.supabase.co:5432/postgres?sslmode=require",
 		CORSOrigins:    []string{"https://app.example.com"},
 		TrustProxy:     true,
 		AccessTokenTTL: 15 * time.Minute,
