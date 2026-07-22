@@ -34,13 +34,13 @@ export function DashboardView() {
     } catch (err) {
       if (detailReq.current === req) {
         setError(
-          err instanceof ApiError ? err.message : "Could not load that run.",
+          err instanceof ApiError ? err.message : t.dashLoadRunFail,
         );
       }
     } finally {
       if (detailReq.current === req) setDetailLoading(false);
     }
-  }, []);
+  }, [t.dashLoadRunFail]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -58,14 +58,12 @@ export function DashboardView() {
       }
     } catch (err) {
       setError(
-        err instanceof ApiError
-          ? err.message
-          : "Could not load the dashboard. Check your connection and retry.",
+        err instanceof ApiError ? err.message : t.dashLoadFail,
       );
     } finally {
       setLoading(false);
     }
-  }, [select]);
+  }, [select, t.dashLoadFail]);
 
   useEffect(() => {
     refresh();
@@ -78,7 +76,7 @@ export function DashboardView() {
       refresh();
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Could not delete that run.",
+        err instanceof ApiError ? err.message : t.dashDeleteFail,
       );
     }
   }
@@ -103,25 +101,25 @@ export function DashboardView() {
         >
           <span>{error}</span>
           <button className="btn btn-ghost !py-1 !px-2.5 text-xs" onClick={refresh}>
-            ↻ Retry
+            ↻ {t.dashRetry}
           </button>
         </div>
       )}
 
       {/* Metrics row */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <Metric label="Total runs" value={metrics?.total_runs ?? "—"} />
+        <Metric label={t.dashTotalRuns} value={metrics?.total_runs ?? "—"} />
         <Metric
-          label="Avg score"
+          label={t.dashAvgScore}
           value={metrics ? metrics.avg_score.toFixed(1) : "—"}
           accent
         />
         <Metric
-          label="Avg latency"
+          label={t.dashAvgLatency}
           value={metrics ? `${Math.round(metrics.avg_latency_ms)}ms` : "—"}
         />
         <Metric
-          label="Throughput"
+          label={t.dashThroughput}
           value={
             metrics && metrics.avg_tokens_per_sec > 0
               ? `${metrics.avg_tokens_per_sec.toFixed(1)} tok/s`
@@ -130,7 +128,7 @@ export function DashboardView() {
           accent
         />
         <Metric
-          label="Density"
+          label={t.dashDensity}
           value={
             metrics && metrics.avg_chars_per_token > 0
               ? `${metrics.avg_chars_per_token.toFixed(1)} c/tok`
@@ -138,7 +136,7 @@ export function DashboardView() {
           }
         />
         <Metric
-          label="Avg efficiency"
+          label={t.dashAvgEfficiency}
           value={
             metrics && metrics.avg_efficiency_score > 0
               ? metrics.avg_efficiency_score.toFixed(0)
@@ -150,9 +148,9 @@ export function DashboardView() {
       {metrics && Object.keys(metrics.grade_distribution).length > 0 && (
         <div className="card p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold">Grade distribution</h3>
+            <h3 className="text-sm font-semibold">{t.dashGradeDist}</h3>
             <button className="btn btn-ghost !py-1 !px-2.5 text-xs" onClick={refresh}>
-              ↻ Refresh
+              ↻ {t.dashRefresh}
             </button>
           </div>
           <GradeBars distribution={metrics.grade_distribution} />
@@ -167,15 +165,15 @@ export function DashboardView() {
         {/* Run list */}
         <div className="card p-2">
           <div className="px-2 py-2 flex items-center justify-between">
-            <h3 className="text-sm font-semibold">Run history</h3>
+            <h3 className="text-sm font-semibold">{t.dashRunHistory}</h3>
             <span className="text-xs mono" style={{ color: "var(--text-faint)" }}>
-              {runs.length} runs
+              {t.dashRunsCount.replace("{n}", String(runs.length))}
             </span>
           </div>
           <div className="max-h-[28rem] overflow-y-auto scrollbar-thin space-y-1">
             {loading && runs.length === 0 ? (
               <p className="p-3 text-sm animate-pulse-soft" style={{ color: "var(--text-dim)" }}>
-                loading…
+                {t.dashLoading}
               </p>
             ) : runs.length === 0 ? (
               <p className="p-3 text-sm" style={{ color: "var(--text-faint)" }}>
@@ -225,22 +223,25 @@ export function DashboardView() {
         <div className="space-y-4">
           {detailLoading && !selected ? (
             <div className="card p-8 text-center text-sm animate-pulse-soft" style={{ color: "var(--text-dim)" }}>
-              loading run…
+              {t.dashLoadingRun}
             </div>
           ) : selected ? (
             <>
               <div className="card p-4">
                 <div className="flex items-start justify-between gap-3 mb-3">
-                  <h3 className="text-sm font-semibold">Run detail</h3>
+                  <h3 className="text-sm font-semibold">{t.dashRunDetail}</h3>
                   <button
                     className="btn btn-ghost !py-1 !px-2.5 text-xs"
                     onClick={() => remove(selected.id)}
                   >
-                    Delete
+                    {t.dashDelete}
                   </button>
                 </div>
-                <Field label="Prompt" value={selected.prompt} />
-                <Field label="Response" value={selected.response || "(empty)"} />
+                <Field label={t.dashPrompt} value={selected.prompt} />
+                <Field
+                  label={t.dashResponse}
+                  value={selected.response || t.dashEmpty}
+                />
                 {selected.expected_keywords.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {selected.expected_keywords.map((k) => (
@@ -255,13 +256,13 @@ export function DashboardView() {
                 <ScoreCard score={selected.score} />
               ) : (
                 <div className="card p-4 text-sm" style={{ color: "var(--text-dim)" }}>
-                  This run has no score yet.
+                  {t.dashNoScore}
                 </div>
               )}
             </>
           ) : (
             <div className="card p-8 text-center text-sm" style={{ color: "var(--text-faint)" }}>
-              Select a run to inspect its response and score.
+              {t.dashSelectRun}
             </div>
           )}
         </div>

@@ -5,6 +5,7 @@ import type { Score } from "@/lib/types";
 import { EfficiencyPanel } from "./EfficiencyPanel";
 import { useI18n } from "@/i18n/LocaleProvider";
 import type { Messages } from "@/i18n/messages";
+import { formatRationale } from "@/i18n/format";
 
 const COMMERCE_KEYS = [
   "claim_risk",
@@ -96,7 +97,9 @@ export function ScoreCard({ score }: { score: Score }) {
       <div className="card p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold">{t.scoreTitle}</h2>
-          <span className={`pill grade-${score.grade}`}>Grade {score.grade}</span>
+          <span className={`pill grade-${score.grade}`}>
+            {t.scoreGrade} {score.grade}
+          </span>
         </div>
 
         <div className="flex items-center gap-4 mb-4">
@@ -166,7 +169,7 @@ export function ScoreCard({ score }: { score: Score }) {
             className="text-xs mt-4 leading-5"
             style={{ color: "var(--text-dim)" }}
           >
-            {score.rationale}
+            {formatRationale(score.rationale, t)}
           </p>
         )}
       </div>

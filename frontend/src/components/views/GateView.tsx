@@ -5,11 +5,19 @@ import { api, ApiError } from "@/lib/api";
 import type { AnalyzeListingResult, CanonicalProduct } from "@/lib/types";
 import { ScoreCard } from "../ui/ScoreCard";
 import { useI18n } from "@/i18n/LocaleProvider";
+import { formatFlag, formatInsight } from "@/i18n/format";
+import type { Messages } from "@/i18n/messages";
 
 type Mode = "mock" | "manual";
 
+const ANALYZE_MS = 20_000;
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 export function GateView() {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const [mode, setMode] = useState<Mode>("mock");
   const [products, setProducts] = useState<CanonicalProduct[]>([]);
   const [selectedId, setSelectedId] = useState("");
@@ -18,6 +26,7 @@ export function GateView() {
   const [keywords, setKeywords] = useState("");
   const [loadingList, setLoadingList] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalyzeListingResult | null>(null);
 
@@ -56,28 +65,39 @@ export function GateView() {
     setAnalyzing(true);
     setError(null);
     setResult(null);
+    setProgress(0);
+    const started = Date.now();
+    const tick = window.setInterval(() => {
+      const pct = Math.min(96, ((Date.now() - started) / ANALYZE_MS) * 100);
+      setProgress(pct);
+    }, 80);
+
     try {
       const kw = keywords
         .split(",")
         .map((k) => k.trim())
         .filter(Boolean);
-      const res =
+      const request =
         mode === "mock"
-          ? await api.analyzeListing({
+          ? api.analyzeListing({
               source: "mock",
               product_id: selectedId,
               keywords: kw.length ? kw : undefined,
             })
-          : await api.analyzeListing({
+          : api.analyzeListing({
               source: "manual",
               title,
               description,
               keywords: kw.length ? kw : undefined,
             });
+
+      const [res] = await Promise.all([request, sleep(ANALYZE_MS)]);
+      setProgress(100);
       setResult(res);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t.gateAnalyzeFail);
     } finally {
+      window.clearInterval(tick);
       setAnalyzing(false);
     }
   }
@@ -138,9 +158,7 @@ export function GateView() {
           {mode === "mock" ? (
             <div className="card p-4 space-y-3">
               <div className="flex items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold">
-                  {locale === "tr" ? "Mock Trendyol feed" : "Mock marketplace feed"}
-                </h2>
+                <h2 className="text-sm font-semibold">{t.gateMockFeed}</h2>
                 <button
                   type="button"
                   className="btn btn-ghost !py-1 !px-2.5 text-xs"
@@ -188,7 +206,7 @@ export function GateView() {
                   className="input"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Men navy cotton basic tee"
+                  placeholder={t.gateTitlePh}
                 />
               </div>
               <div>
@@ -198,7 +216,7 @@ export function GateView() {
                   rows={6}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Material, fit, care…"
+                  placeholder={t.gateDescPh}
                 />
               </div>
             </div>
@@ -211,7 +229,7 @@ export function GateView() {
                 className="input"
                 value={keywords}
                 onChange={(e) => setKeywords(e.target.value)}
-                placeholder="cotton, size, care"
+                placeholder={t.gateKeywordsPh}
               />
             </div>
             <button
@@ -231,12 +249,14 @@ export function GateView() {
         </div>
 
         <div className="space-y-4">
-          {!result ? (
+          {analyzing ? (
+            <AnalyzeProgress progress={progress} t={t} />
+          ) : !result ? (
             <div
               className="card p-8 text-center text-sm"
               style={{ color: "var(--text-faint)" }}
             >
-              {t.gateDecision}: PASS / REVIEW / REJECT
+              {t.gateDecision}: {t.gateDecisionHint}
             </div>
           ) : (
             <>
@@ -252,21 +272,30 @@ export function GateView() {
                         style={{ color: "var(--text-dim)" }}
                       >
                         <span style={{ color: "var(--accent)" }}>▸</span>
-                        <span>{tip}</span>
+                        <span>{formatInsight(tip, t)}</span>
                       </li>
                     ))}
                   </ul>
                   {result.flags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-3">
-                      {result.flags.map((f) => (
-                        <span
-                          key={f}
-                          className="pill mono"
-                          style={{ color: "var(--warn)" }}
-                        >
-                          {f}
-                        </span>
-                      ))}
+                    <div className="mt-3">
+                      <div
+                        className="text-[11px] uppercase tracking-wide mb-1.5"
+                        style={{ color: "var(--text-faint)" }}
+                      >
+                        {t.gateFlags}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {result.flags.map((f) => (
+                          <span
+                            key={f}
+                            className="pill"
+                            style={{ color: "var(--warn)" }}
+                            title={f}
+                          >
+                            {formatFlag(f, t)}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -275,6 +304,67 @@ export function GateView() {
             </>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function AnalyzeProgress({
+  progress,
+  t,
+}: {
+  progress: number;
+  t: Messages;
+}) {
+  const stage =
+    progress < 22
+      ? t.gateProgressGather
+      : progress < 48
+        ? t.gateProgressClaims
+        : progress < 74
+          ? t.gateProgressScore
+          : progress < 92
+            ? t.gateProgressDecide
+            : t.gateProgressAlmost;
+
+  return (
+    <div className="card p-6 space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-sm font-semibold">{t.gateProgressTitle}</h3>
+        <span className="mono text-xs" style={{ color: "var(--accent)" }}>
+          {Math.round(progress)}%
+        </span>
+      </div>
+      <div
+        className="h-2.5 rounded-full overflow-hidden"
+        style={{ background: "var(--bg-elev-2)" }}
+      >
+        <div
+          className="h-full rounded-full transition-[width] duration-100 ease-linear"
+          style={{
+            width: `${progress}%`,
+            background:
+              "linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 55%, #34d399))",
+          }}
+        />
+      </div>
+      <p className="text-xs leading-5" style={{ color: "var(--text-dim)" }}>
+        {stage}
+      </p>
+      <div className="flex gap-1.5">
+        {[0, 1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="h-1.5 flex-1 rounded-full"
+            style={{
+              background:
+                progress >= (i + 1) * 22
+                  ? "var(--accent)"
+                  : "var(--bg-elev-2)",
+              transition: "background 200ms",
+            }}
+          />
+        ))}
       </div>
     </div>
   );
@@ -290,7 +380,8 @@ function DecisionBanner({ result }: { result: AnalyzeListingResult }) {
     >
       <div>
         <div className="text-xs mb-1" style={{ color: "var(--text-faint)" }}>
-          {t.gateDecision} · {result.engine} · run {result.run_id.slice(0, 8)}…
+          {t.gateDecision} · {result.engine} · {t.gateRun}{" "}
+          {result.run_id.slice(0, 8)}…
         </div>
         <div className="text-2xl font-bold mono" style={{ color: style.color }}>
           {result.decision}

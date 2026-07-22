@@ -4,66 +4,73 @@
 // Complements the Deci.Scoring "efficiency" bar with concrete tok/s insight.
 
 import type { EfficiencyReport } from "@/lib/types";
-
-const VERDICT_STYLE: Record<
-  string,
-  { label: string; color: string; soft: string }
-> = {
-  excellent: { label: "Excellent", color: "var(--good)", soft: "color-mix(in srgb, var(--good) 14%, transparent)" },
-  good: { label: "Good", color: "#a3e635", soft: "color-mix(in srgb, #a3e635 14%, transparent)" },
-  fair: { label: "Fair", color: "var(--warn)", soft: "color-mix(in srgb, var(--warn) 14%, transparent)" },
-  poor: { label: "Poor", color: "var(--bad)", soft: "color-mix(in srgb, var(--bad) 14%, transparent)" },
-};
+import { useI18n } from "@/i18n/LocaleProvider";
 
 export function EfficiencyPanel({ report }: { report: EfficiencyReport }) {
-  const style = VERDICT_STYLE[report.verdict] ?? VERDICT_STYLE.fair;
+  const { t } = useI18n();
+  const verdictLabel =
+    report.verdict === "excellent"
+      ? t.effExcellent
+      : report.verdict === "good"
+        ? t.effGood
+        : report.verdict === "poor"
+          ? t.effPoor
+          : t.effFair;
+  const color =
+    report.verdict === "excellent"
+      ? "var(--good)"
+      : report.verdict === "good"
+        ? "#a3e635"
+        : report.verdict === "poor"
+          ? "var(--bad)"
+          : "var(--warn)";
+  const soft = `color-mix(in srgb, ${color} 14%, transparent)`;
 
   return (
     <div className="card p-4 space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold">Model efficiency</h3>
+          <h3 className="text-sm font-semibold">{t.effTitle}</h3>
           <p className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }}>
-            Throughput · density · token economy
+            {t.effSub}
           </p>
         </div>
         <span
           className="pill text-xs font-semibold"
-          style={{ color: style.color, background: style.soft, borderColor: "transparent" }}
+          style={{ color, background: soft, borderColor: "transparent" }}
         >
-          {style.label}
+          {verdictLabel}
         </span>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <MiniStat
-          label="Throughput"
+          label={t.effThroughput}
           value={fmt(report.tokens_per_sec, "tok/s")}
-          hint="completion tokens / sec"
+          hint={t.effHintTok}
         />
         <MiniStat
-          label="Density"
+          label={t.effDensity}
           value={fmt(report.chars_per_token, "c/tok")}
-          hint="chars per completion token"
+          hint={t.effHintDensity}
         />
         <MiniStat
-          label="Write speed"
+          label={t.effWriteSpeed}
           value={fmt(report.chars_per_sec, "ch/s")}
-          hint="response chars / sec"
+          hint={t.effHintWrite}
         />
         <MiniStat
-          label="Out / in"
+          label={t.effOutIn}
           value={
             report.token_ratio > 0 ? `${report.token_ratio.toFixed(2)}×` : "—"
           }
-          hint="completion ÷ prompt tokens"
+          hint={t.effHintRatio}
         />
       </div>
 
-      {/* Efficiency dimension gauge */}
       <div>
         <div className="flex justify-between text-xs mb-1.5">
-          <span style={{ color: "var(--text-dim)" }}>Deci.Scoring · efficiency</span>
+          <span style={{ color: "var(--text-dim)" }}>{t.effDimLabel}</span>
           <span className="mono">{report.dimension_score.toFixed(0)} / 100</span>
         </div>
         <div
@@ -74,22 +81,16 @@ export function EfficiencyPanel({ report }: { report: EfficiencyReport }) {
             className="h-full rounded-full transition-all"
             style={{
               width: `${Math.min(100, report.dimension_score)}%`,
-              background: style.color,
+              background: color,
             }}
           />
         </div>
       </div>
 
-      {/* Reference bands */}
       <div className="grid grid-cols-3 gap-2 text-[11px] mono">
         <Band label="tok/s" low="<8" mid="8–40" high="≥40" />
         <Band label="c/tok" low="<2" mid="2–4" high="≥4" />
-        <Band
-          label="latency"
-          low={`≥${20}s`}
-          mid="1.5–20s"
-          high="≤1.5s"
-        />
+        <Band label="latency" low={`≥${20}s`} mid="1.5–20s" high="≤1.5s" />
       </div>
 
       {report.insights.length > 0 && (
@@ -100,7 +101,7 @@ export function EfficiencyPanel({ report }: { report: EfficiencyReport }) {
               className="text-xs leading-5 flex gap-2"
               style={{ color: "var(--text-dim)" }}
             >
-              <span style={{ color: style.color }}>▸</span>
+              <span style={{ color }}>▸</span>
               <span>{tip}</span>
             </li>
           ))}
@@ -125,7 +126,10 @@ function MiniStat({
       style={{ background: "var(--bg-elev-2)", border: "1px solid var(--border)" }}
       title={hint}
     >
-      <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--text-faint)" }}>
+      <div
+        className="text-[10px] uppercase tracking-wide"
+        style={{ color: "var(--text-faint)" }}
+      >
         {label}
       </div>
       <div className="text-sm font-bold mono mt-0.5">{value}</div>

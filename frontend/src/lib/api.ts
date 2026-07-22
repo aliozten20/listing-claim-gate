@@ -86,6 +86,14 @@ async function request<T>(
 ): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("Content-Type", "application/json");
+  try {
+    const loc = localStorage.getItem("listing-gate-locale");
+    if (loc === "en" || loc === "tr") {
+      headers.set("Accept-Language", loc);
+    }
+  } catch {
+    /* ignore */
+  }
   const access = getAccess();
   if (access) headers.set("Authorization", `Bearer ${access}`);
 

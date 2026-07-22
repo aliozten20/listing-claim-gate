@@ -55,7 +55,7 @@ export function AuthView() {
       ) {
         setError(t.authApiDown);
       } else {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+        setError(err instanceof Error ? err.message : t.authGenericError);
       }
     } finally {
       setBusy(false);
@@ -154,7 +154,7 @@ export function AuthView() {
                   className="auth-input"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Ada Lovelace"
+                  placeholder={t.authNamePh}
                   autoComplete="name"
                   required={sub === "register"}
                 />
@@ -168,7 +168,7 @@ export function AuthView() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@shop.com"
+                placeholder={t.authEmailPh}
                 autoComplete="email"
                 inputMode="email"
                 required

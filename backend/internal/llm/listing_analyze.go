@@ -47,15 +47,15 @@ func AnalyzeListingText(title, description string, extraKeywords []string) (
 	}
 	if titleLen > 0 && titleLen < 12 {
 		flags = append(flags, "title_too_short")
-		insights = append(insights, "Title is very short; aim for ~12+ characters for search and conversion.")
+		insights = append(insights, "title_too_short")
 	}
 	if titleLen > 100 {
 		flags = append(flags, "title_too_long")
-		insights = append(insights, "Title is very long; watch marketplace character limits.")
+		insights = append(insights, "title_too_long")
 	}
 	if descLen > 0 && descLen < 40 {
 		flags = append(flags, "description_too_short")
-		insights = append(insights, "Description is thin; add material, fit/use, and care details.")
+		insights = append(insights, "description_too_short")
 	}
 	if descLen > 4000 {
 		flags = append(flags, "description_too_long")
@@ -69,12 +69,12 @@ func AnalyzeListingText(title, description string, extraKeywords []string) (
 	}
 	if len(foundClaims) > 0 {
 		flags = append(flags, "risky_claims")
-		insights = append(insights,
-			fmt.Sprintf("Unsubstantiated / high-risk claim signal: %s", strings.Join(foundClaims, ", ")))
+		// Code + payload so the FE can localize: risky_claims|marker1,marker2
+		insights = append(insights, "risky_claims|"+strings.Join(foundClaims, ", "))
 	}
 	if strings.Contains(combined, "iade yok") || strings.Contains(combined, "no returns") {
 		flags = append(flags, "restrictive_return_policy")
-		insights = append(insights, "Restrictive return language can hurt trust and compliance.")
+		insights = append(insights, "restrictive_return_policy")
 	}
 
 	// Keywords for Deci.Scoring coverage: prefer caller hints, else heuristic.
@@ -113,7 +113,7 @@ func AnalyzeListingText(title, description string, extraKeywords []string) (
 	}
 
 	if len(insights) == 0 {
-		insights = append(insights, "Listing passed basic quality checks.")
+		insights = append(insights, "passed_basic")
 	}
 	return response, keywords, flags, insights, decision
 }
