@@ -1,0 +1,32 @@
+---
+description: Go backend conventions for the API
+globs: backend/**/*.go
+alwaysApply: false
+---
+
+# Backend (Go)
+
+## Layout
+
+```
+backend/
+  cmd/server/main.go
+  internal/{config,common,auth,llm,docs}/
+  migrations/   # embedded SQL, applied on boot
+```
+
+## Patterns
+
+- Layered: handler → store/repository; constructor injection in `main`
+- chi router; JSON helpers in `internal/common`
+- Auth: JWT access + rotating refresh sessions; rate-limit public auth routes
+- LLM: persist raw runs; score via `llm.ScoreRun` (weights + breakdown)
+- Production: `Config.Validate()` must refuse insecure JWT/CORS
+
+## Endpoints floor
+
+Config 2 + Common 2 + Auth ≥8 + WEB MLC-LLM 6–8 ≥ **20** total.
+
+## Tests
+
+Keep scoring and auth/middleware regression tests green when changing rules.

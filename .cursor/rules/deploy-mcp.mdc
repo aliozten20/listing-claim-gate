@@ -1,0 +1,28 @@
+---
+description: Deploy and MCP conventions for Vercel + Render
+globs: "{render.yaml,**/README.md,docs/**}"
+alwaysApply: false
+---
+
+# Deploy + MCP
+
+## Targets
+
+| Layer | Host | Root / note |
+| --- | --- | --- |
+| Frontend | Vercel | Root Directory = `frontend` |
+| Backend | Render | `render.yaml` → `rootDir: backend` + Postgres |
+
+## Env
+
+- FE: `NEXT_PUBLIC_API_URL=<Render URL>`
+- BE: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGINS=<Vercel URL>`, `TRUST_PROXY=true`, `APP_ENV=production`
+
+## MCP order
+
+1. Render MCP — API + DB blueprint / env / logs  
+2. Vercel MCP — FE deploy + env  
+3. Set `CORS_ORIGINS` to the live Vercel origin  
+4. MF Academy MCP — delivery / mentor flow  
+
+Update README live URLs only after both sides are actually live.

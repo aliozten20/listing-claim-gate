@@ -1,0 +1,32 @@
+---
+description: Listing Gate UI — shadcn, responsive, visual consistency
+globs: frontend/**/*.{tsx,css}
+alwaysApply: false
+---
+
+# Frontend design (Listing & Claim Gate)
+
+## Sources
+
+- Follow shadcn/ui compose rules: use primitives first, `gap-*` not `space-y-*`,
+  semantic tokens, no manual purple “AI slop” themes.
+- App shell (not a marketing landing): Gate / Monitoring density over hero chrome.
+- Illustrations only from `public/illustrations/` using docs/ILLUSTRATIONS.md prompts.
+
+## Responsive
+
+- Mobile-first. Gate: tabs stack; result below form on `<md`, split on `md+`.
+- Monitoring: 2-col metrics on mobile, up to 6 on `lg`.
+- Nav: collapse labels on small screens; keep touch targets ≥44px.
+
+## Gate UX
+
+- Two modes only for now: **Mock** (fetch products → analyze) and **Manual** (title+desc).
+- Always show publish decision badge: PASS / REVIEW / REJECT.
+- Pair ScoreCard with EfficiencyPanel when analysis returns efficiency_analysis.
+
+## Do not
+
+- Cards-for-decoration in empty states beyond one quiet panel.
+- Inconsistent illustration styles or huge hero images.
+- Platform-specific forms (Trendyol fields) until real adapters land.

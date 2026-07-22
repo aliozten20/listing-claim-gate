@@ -1,0 +1,26 @@
+---
+description: Next.js SPA and WebLLM frontend conventions
+globs: frontend/**/*.{ts,tsx,css}
+alwaysApply: false
+---
+
+# Frontend (Next.js SPA)
+
+## Structure
+
+- Single page → `AppShell` client router (hash-based master views)
+- Master views: Auth (login/register subviews), Playground, Monitoring
+- `lib/webllm.ts` — browser-only; dynamic import `@mlc-ai/web-llm`
+- `lib/api.ts` — typed client; refresh-on-401; tokens in localStorage (capstone tradeoff)
+
+## Rules
+
+- Never import WebLLM in server components / SSR paths
+- Require WebGPU check before load; show clear fallback UX
+- After generate: `POST /llm/runs` then show Deci.Scoring breakdown
+- Env: `NEXT_PUBLIC_API_URL` only (no secrets in the client)
+
+## UI
+
+Keep the monitoring/playground surface clear and dense — telemetry and scores first.
+Avoid decorative card clutter that hides latency/tokens/grade.
