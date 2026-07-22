@@ -12,9 +12,10 @@ const listingEngine = "listing-rules-v1"
 
 // Risky claim phrases that push a listing toward REVIEW/REJECT without proof.
 var riskyClaimMarkers = []string{
-	"%100", "yüzde 100", "organik", "yerli üretim", "yerli",
-	"en ucuz", "garantili", "hakiki deri", "el yapımı",
-	"su geçirmez", "tıbbi", "tedavi", "kesin sonuç",
+	"%100", "100%", "yüzde 100", "organik", "yerli üretim", "yerli",
+	"en ucuz", "en iyi", "garantili", "hakiki deri", "el yapımı",
+	"su geçirmez", "tıbbi", "tedavi", "kesin sonuç", "klinik kanıtlı",
+	"7 günde", "mucize", "fda approved",
 }
 
 // AnalyzeListingText scores a title+description listing without calling MLC.
@@ -46,15 +47,15 @@ func AnalyzeListingText(title, description string, extraKeywords []string) (
 	}
 	if titleLen > 0 && titleLen < 12 {
 		flags = append(flags, "title_too_short")
-		insights = append(insights, "Başlık çok kısa; arama ve dönüşüm için en az ~12 karakter önerilir.")
+		insights = append(insights, "Title is very short; aim for ~12+ characters for search and conversion.")
 	}
 	if titleLen > 100 {
 		flags = append(flags, "title_too_long")
-		insights = append(insights, "Başlık aşırı uzun; pazaryeri limitlerine dikkat edin.")
+		insights = append(insights, "Title is very long; watch marketplace character limits.")
 	}
 	if descLen > 0 && descLen < 40 {
 		flags = append(flags, "description_too_short")
-		insights = append(insights, "Açıklama yetersiz; materyal, kullanım ve bakım bilgisi ekleyin.")
+		insights = append(insights, "Description is thin; add material, fit/use, and care details.")
 	}
 	if descLen > 4000 {
 		flags = append(flags, "description_too_long")
@@ -69,11 +70,11 @@ func AnalyzeListingText(title, description string, extraKeywords []string) (
 	if len(foundClaims) > 0 {
 		flags = append(flags, "risky_claims")
 		insights = append(insights,
-			fmt.Sprintf("Kanıtsız / riskli iddia sinyali: %s", strings.Join(foundClaims, ", ")))
+			fmt.Sprintf("Unsubstantiated / high-risk claim signal: %s", strings.Join(foundClaims, ", ")))
 	}
-	if strings.Contains(combined, "iade yok") {
+	if strings.Contains(combined, "iade yok") || strings.Contains(combined, "no returns") {
 		flags = append(flags, "restrictive_return_policy")
-		insights = append(insights, "İade kısıtı güven ve uyum riski taşıyabilir.")
+		insights = append(insights, "Restrictive return language can hurt trust and compliance.")
 	}
 
 	// Keywords for Deci.Scoring coverage: prefer caller hints, else heuristic.
@@ -112,7 +113,7 @@ func AnalyzeListingText(title, description string, extraKeywords []string) (
 	}
 
 	if len(insights) == 0 {
-		insights = append(insights, "Listing temel kalite kontrollerinden geçti.")
+		insights = append(insights, "Listing passed basic quality checks.")
 	}
 	return response, keywords, flags, insights, decision
 }

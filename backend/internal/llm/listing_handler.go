@@ -131,7 +131,8 @@ func (h *Handler) AnalyzeListing(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	score := ScoreRun(run, DefaultWeights())
+	score := ScoreListingCommerce(product.Title, product.DescriptionText, flags, DefaultListingWeights())
+	score.RunID = run.ID
 	saved, err := h.store.UpsertScore(r.Context(), score)
 	if err != nil {
 		common.Error(w, common.ErrInternal("could not save listing score"))
@@ -140,6 +141,9 @@ func (h *Handler) AnalyzeListing(w http.ResponseWriter, r *http.Request) {
 	saved.EfficiencyAnalysis = score.EfficiencyAnalysis
 
 	decision := DecisionFromScore(saved.Score, flags, provisional)
+	if h.onAnalyze != nil {
+		h.onAnalyze(string(decision), latency)
+	}
 
 	common.JSON(w, http.StatusOK, AnalyzeListingResult{
 		Product:    product,

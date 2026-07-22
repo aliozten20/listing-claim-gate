@@ -62,19 +62,22 @@ type Score struct {
 	CreatedAt            time.Time          `json:"created_at"`
 }
 
-// Breakdown carries the per-component scores, each 0..100.
-//
-// This is a struct rather than a map[string]float64 because the set of
-// components is fixed and known at compile time. A map costs an allocation per
-// score, hashing on every read, and gives up any compile-time guarantee that a
-// component name is spelled correctly. The JSON shape is identical, so this is
-// invisible to clients.
+// Breakdown carries per-component scores (0..100).
+// LLM-run Deci fields and Listing Gate commerce fields share one JSON object;
+// unused keys are omitted.
 type Breakdown struct {
-	Completion float64 `json:"completion"`
-	Latency    float64 `json:"latency"`
-	Efficiency float64 `json:"efficiency"`
-	Keywords   float64 `json:"keywords"`
-	Length     float64 `json:"length"`
+	// LLM monitoring (Deci.Scoring on raw runs)
+	Completion float64 `json:"completion,omitempty"`
+	Latency    float64 `json:"latency,omitempty"`
+	Efficiency float64 `json:"efficiency,omitempty"`
+	Keywords   float64 `json:"keywords,omitempty"`
+	Length     float64 `json:"length,omitempty"`
+	// Listing Gate commerce dimensions
+	ClaimRisk         float64 `json:"claim_risk,omitempty"`
+	TitleQuality      float64 `json:"title_quality,omitempty"`
+	DescComplete      float64 `json:"desc_complete,omitempty"`
+	PolicyClarity     float64 `json:"policy_clarity,omitempty"`
+	ContentEfficiency float64 `json:"content_efficiency,omitempty"`
 }
 
 // ---- Request payloads ----
