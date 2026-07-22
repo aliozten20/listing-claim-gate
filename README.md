@@ -1,5 +1,22 @@
-# MasterFabric Capstone — Listing & Claim Gate
+<div align="center">
 
+<a href="https://academy.masterfabric.co">
+  <img src="https://academy.masterfabric.co/academy-badge.png" width="120" alt="MasterFabric Academy">
+</a>
+
+<p>
+  <sub>
+    academy.masterfabric.co is a
+    <a href="https://masterfabric.co">MasterFabric</a>
+    subsidiary.
+  </sub>
+</p>
+
+</div>
+
+# Listing & Claim Gate
+
+**MasterFabric Academy** capstone · [Brand assets](https://academy.masterfabric.co/en/brand-assets)  
 **Repository:** https://github.com/aliozten20/listing-claim-gate
 
 Marketplace / D2C **listing title + description** gate: mock shop or manual paste → commerce **Deci.Scoring** → `PASS` / `REVIEW` / `REJECT`.
@@ -21,6 +38,7 @@ Marketplace / D2C **listing title + description** gate: mock shop or manual past
 | [docs/METRICS.md](./docs/METRICS.md) | Metric meanings + good ranges |
 | [docs/DEPLOY.md](./docs/DEPLOY.md) | Live deploy checklist |
 | [docs/MASTER-PLAN.md](./docs/MASTER-PLAN.md) | Capstone plan |
+| [Brand assets](https://academy.masterfabric.co/en/brand-assets) | Official Academy badge & usage |
 
 ## Quick start (local)
 
@@ -57,6 +75,12 @@ Each bar has an **(i)** info tip in the UI. Details: [docs/METRICS.md](./docs/ME
 ## Production
 
 Follow [docs/DEPLOY.md](./docs/DEPLOY.md): Supabase → Render → Vercel → CORS.
+
+## Academy
+
+- Site: [academy.masterfabric.co](https://academy.masterfabric.co)
+- Brand kit: [academy.masterfabric.co/en/brand-assets](https://academy.masterfabric.co/en/brand-assets)
+- Parent: [masterfabric.co](https://masterfabric.co)
 
 ## License
 
