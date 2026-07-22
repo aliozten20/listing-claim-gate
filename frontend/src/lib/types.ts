@@ -18,11 +18,18 @@ export interface TokenPair {
 }
 
 export interface Breakdown {
-  completion: number;
-  latency: number;
-  efficiency: number;
-  keywords: number;
-  length: number;
+  // LLM-run Deci
+  completion?: number;
+  latency?: number;
+  efficiency?: number;
+  keywords?: number;
+  length?: number;
+  // Listing Gate commerce
+  claim_risk?: number;
+  title_quality?: number;
+  desc_complete?: number;
+  policy_clarity?: number;
+  content_efficiency?: number;
 }
 
 export interface EfficiencyReport {

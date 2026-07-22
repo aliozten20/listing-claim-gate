@@ -1,20 +1,41 @@
 "use client";
 
-// Master view: Auth. Contains two subviews — Login and Register — swapped
-// client-side without navigation.
-
 import { useState } from "react";
 import { useAuth } from "@/store/auth";
 import { ApiError } from "@/lib/api";
+import { LanguageToggle, useI18n } from "@/i18n/LocaleProvider";
 
 type SubView = "login" | "register";
 
+const PREVIEW_ROWS = [
+  {
+    title: "Organic cotton tee — soft everyday fit",
+    decision: "PASS",
+    score: 91,
+    tone: "pass" as const,
+  },
+  {
+    title: "Renews skin in 7 days — clinically proven",
+    decision: "REJECT",
+    score: 28,
+    tone: "reject" as const,
+  },
+  {
+    title: "Best price · limited stock",
+    decision: "REVIEW",
+    score: 64,
+    tone: "review" as const,
+  },
+];
+
 export function AuthView() {
   const { login, register } = useAuth();
+  const { t } = useI18n();
   const [sub, setSub] = useState<SubView>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -25,14 +46,14 @@ export function AuthView() {
     try {
       if (sub === "login") await login(email, password);
       else await register(email, password, name);
-      // On success the AppShell re-renders into the app automatically.
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
-      } else if (err instanceof TypeError || (err instanceof Error && /fetch|network|Failed/i.test(err.message))) {
-        setError(
-          "API’ye ulaşılamıyor. Backend’in http://localhost:8080 üzerinde çalıştığından emin olun (docker compose up veya go run).",
-        );
+      } else if (
+        err instanceof TypeError ||
+        (err instanceof Error && /fetch|network|Failed/i.test(err.message))
+      ) {
+        setError(t.authApiDown);
       } else {
         setError(err instanceof Error ? err.message : "Something went wrong");
       }
@@ -41,156 +62,184 @@ export function AuthView() {
     }
   }
 
-  return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-      {/* Brand / pitch panel */}
-      <div
-        className="hidden lg:flex flex-col justify-between p-12"
-        style={{
-          background:
-            "radial-gradient(900px 480px at 0% 0%, rgba(15,118,110,0.18) 0%, transparent 55%), linear-gradient(160deg, #dfe8ee 0%, #e8eef2 45%, #f4f7f9 100%)",
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <span
-            className="grid place-items-center w-9 h-9 rounded-lg font-bold"
-            style={{ background: "var(--accent)", color: "#ecfdf5" }}
-          >
-            LG
-          </span>
-          <span className="font-semibold">Listing Gate</span>
-        </div>
-        <div className="max-w-md">
-          <h1 className="display text-4xl font-bold leading-tight tracking-tight">
-            Listing & Claim Gate
-            <br />
-            <span className="text-2xl font-semibold" style={{ color: "var(--text-dim)" }}>
-              Deci.Scoring
-            </span>
-          </h1>
-          <p className="mt-4 text-sm leading-6" style={{ color: "var(--text-dim)" }}>
-            Mock mağaza veya manuel title/açıklama ile listing kalitesini ölçün.
-            Yayın kararı: <strong>PASS</strong> / <strong>REVIEW</strong> /{" "}
-            <strong>REJECT</strong> — şeffaf skor kırılımı ile.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-2">
-            {["Mock + Manuel", "Go + Postgres API", "A–F decision grades"].map(
-              (t) => (
-                <span key={t} className="pill" style={{ color: "var(--text-dim)" }}>
-                  {t}
-                </span>
-              ),
-            )}
-          </div>
-        </div>
-        <div className="text-xs mono" style={{ color: "var(--text-faint)" }}>
-          Next.js SPA → Vercel · Go → Render
-        </div>
-      </div>
+  function switchSub(next: SubView) {
+    setSub(next);
+    setError(null);
+  }
 
-      {/* Form panel */}
-      <div className="flex items-center justify-center p-6">
-        <div className="w-full max-w-sm">
-          <div
-            className="inline-flex p-1 rounded-lg mb-6"
-            style={{ background: "var(--bg-elev-2)" }}
-          >
-            {(["login", "register"] as SubView[]).map((s) => (
-              <button
-                key={s}
-                onClick={() => {
-                  setSub(s);
-                  setError(null);
-                }}
-                className="px-4 py-1.5 rounded-md text-sm font-semibold capitalize transition-colors"
-                style={{
-                  background: sub === s ? "var(--accent)" : "transparent",
-                  color: sub === s ? "#ecfdf5" : "var(--text-dim)",
-                }}
+  return (
+    <div className="auth-root">
+      <aside className="auth-brand">
+        <div className="auth-brand-wash" />
+        <div className="auth-brand-inner">
+          <div className="auth-brand-top">
+            <span className="auth-mark" aria-hidden>
+              LG
+            </span>
+            <span className="auth-brand-name">{t.brand}</span>
+            <div className="ml-auto">
+              <LanguageToggle />
+            </div>
+          </div>
+
+          <div className="auth-brand-hero">
+            <p className="auth-eyebrow">{t.authEyebrow}</p>
+            <h1 className="auth-display">
+              {t.authDisplay1}
+              <span className="auth-display-line">{t.authDisplay2}</span>
+            </h1>
+            <p className="auth-lede">{t.authLede}</p>
+          </div>
+
+          <div className="auth-preview" aria-hidden>
+            {PREVIEW_ROWS.map((row, i) => (
+              <div
+                key={row.title}
+                className={`auth-preview-row auth-preview-row--${row.tone}`}
+                style={{ animationDelay: `${0.15 + i * 0.08}s` }}
               >
-                {s}
-              </button>
+                <div className="auth-preview-meta">
+                  <span className="auth-preview-title">{row.title}</span>
+                  <span className={`auth-chip auth-chip--${row.tone}`}>
+                    {row.decision}
+                  </span>
+                </div>
+                <div className="auth-preview-bar">
+                  <i style={{ width: `${row.score}%` }} />
+                </div>
+                <span className="auth-preview-score mono">{row.score}</span>
+              </div>
             ))}
           </div>
 
-          <h2 className="display text-2xl font-bold mb-1">
-            {sub === "login" ? "Welcome back" : "Create your account"}
-          </h2>
-          <p className="text-sm mb-6" style={{ color: "var(--text-dim)" }}>
-            {sub === "login"
-              ? "Sign in to score marketplace listings."
-              : "Create an account to open Listing & Claim Gate."}
-          </p>
+          <p className="auth-brand-foot mono">{t.authFoot}</p>
+        </div>
+      </aside>
 
-          <form onSubmit={submit} className="space-y-4">
+      <section className="auth-form-plane">
+        <div className="auth-form-sheet auth-rise">
+          <div className="auth-tabs" role="tablist" aria-label="Auth mode">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={sub === "login"}
+              className={sub === "login" ? "is-active" : undefined}
+              onClick={() => switchSub("login")}
+            >
+              {t.authTabSignIn}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={sub === "register"}
+              className={sub === "register" ? "is-active" : undefined}
+              onClick={() => switchSub("register")}
+            >
+              {t.authTabRegister}
+            </button>
+          </div>
+
+          <header className="auth-form-head">
+            <h2 className="display">
+              {sub === "login" ? t.authWelcome : t.authOpen}
+            </h2>
+            <p>{sub === "login" ? t.authWelcomeSub : t.authOpenSub}</p>
+          </header>
+
+          <form onSubmit={submit} className="auth-fields" noValidate>
             {sub === "register" && (
-              <div>
-                <label className="label">Name</label>
+              <label className="auth-field">
+                <span>{t.authName}</span>
                 <input
-                  className="input"
+                  className="auth-input"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ada Lovelace"
                   autoComplete="name"
+                  required={sub === "register"}
                 />
-              </div>
+              </label>
             )}
-            <div>
-              <label className="label">Email</label>
+
+            <label className="auth-field">
+              <span>{t.authEmail}</span>
               <input
-                className="input"
+                className="auth-input"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@masterfabric.co"
+                placeholder="you@shop.com"
                 autoComplete="email"
+                inputMode="email"
                 required
               />
-            </div>
-            <div>
-              <label className="label">Password</label>
-              <input
-                className="input"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 8 characters"
-                autoComplete={
-                  sub === "login" ? "current-password" : "new-password"
-                }
-                minLength={8}
-                required
-              />
-            </div>
+            </label>
+
+            <label className="auth-field">
+              <span className="auth-field-row">
+                {t.authPassword}
+                {sub === "login" && (
+                  <span className="auth-hint">{t.authPwHint}</span>
+                )}
+              </span>
+              <div className="auth-pw">
+                <input
+                  className="auth-input"
+                  type={showPw ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={t.authPwHint}
+                  autoComplete={
+                    sub === "login" ? "current-password" : "new-password"
+                  }
+                  minLength={8}
+                  required
+                />
+                <button
+                  type="button"
+                  className="auth-pw-toggle"
+                  onClick={() => setShowPw((v) => !v)}
+                  aria-label={showPw ? t.authHide : t.authShow}
+                >
+                  {showPw ? t.authHide : t.authShow}
+                </button>
+              </div>
+            </label>
 
             {error && (
-              <div
-                className="text-sm rounded-lg px-3 py-2"
-                style={{
-                  background: "color-mix(in srgb, var(--bad) 12%, transparent)",
-                  color: "var(--bad)",
-                  border:
-                    "1px solid color-mix(in srgb, var(--bad) 30%, transparent)",
-                }}
-              >
+              <div className="auth-error" role="alert">
                 {error}
               </div>
             )}
 
-            <button
-              type="submit"
-              className="btn btn-primary w-full"
-              disabled={busy}
-            >
+            <button type="submit" className="auth-submit" disabled={busy}>
               {busy
-                ? "Please wait…"
+                ? t.authWorking
                 : sub === "login"
-                  ? "Sign in"
-                  : "Create account"}
+                  ? t.authSubmitLogin
+                  : t.authSubmitRegister}
             </button>
           </form>
+
+          <p className="auth-switch">
+            {sub === "login" ? (
+              <>
+                {t.authNewShop}{" "}
+                <button type="button" onClick={() => switchSub("register")}>
+                  {t.authCreateLink}
+                </button>
+              </>
+            ) : (
+              <>
+                {t.authHaveAccess}{" "}
+                <button type="button" onClick={() => switchSub("login")}>
+                  {t.authSignInLink}
+                </button>
+              </>
+            )}
+          </p>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

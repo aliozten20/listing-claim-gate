@@ -8,8 +8,10 @@ import { api, ApiError } from "@/lib/api";
 import type { Metrics, Run, RunSummary } from "@/lib/types";
 import { ScoreCard } from "../ui/ScoreCard";
 import { ModelEfficiencyTable } from "../ui/ModelEfficiencyTable";
+import { useI18n } from "@/i18n/LocaleProvider";
 
 export function DashboardView() {
+  const { t } = useI18n();
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [runs, setRuns] = useState<RunSummary[]>([]);
   const [selected, setSelected] = useState<Run | null>(null);
@@ -83,6 +85,13 @@ export function DashboardView() {
 
   return (
     <div className="max-w-6xl mx-auto p-5 space-y-5">
+      <div>
+        <h1 className="text-lg font-semibold">{t.dashTitle}</h1>
+        <p className="text-xs mt-1" style={{ color: "var(--text-dim)" }}>
+          {t.dashSub}
+        </p>
+      </div>
+
       {error && (
         <div
           className="card p-4 flex items-center justify-between gap-3 text-sm"
@@ -170,7 +179,7 @@ export function DashboardView() {
               </p>
             ) : runs.length === 0 ? (
               <p className="p-3 text-sm" style={{ color: "var(--text-faint)" }}>
-                No runs yet. Head to the Playground and run Gemma.
+                {t.gateEmptyDecisions}
               </p>
             ) : (
               runs.map((r) => (

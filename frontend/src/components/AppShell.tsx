@@ -1,32 +1,27 @@
 "use client";
 
-// AppShell is the client-side router for the SPA. It holds the active master
-// view in state, syncs it to the URL hash (so views are shareable/back-button
-// friendly) and swaps views in place with no full-page reload.
+// App shell — e-commerce SaaS: Auth · Gate · Decisions + language toggle.
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/store/auth";
+import { LanguageToggle, useI18n } from "@/i18n/LocaleProvider";
 import { AuthView } from "./views/AuthView";
 import { GateView } from "./views/GateView";
 import { DashboardView } from "./views/DashboardView";
-import { PlaygroundView } from "./views/PlaygroundView";
 
-export type MasterView = "gate" | "dashboard" | "playground";
-
-const NAV: { id: MasterView; label: string; icon: string }[] = [
-  { id: "gate", label: "Gate", icon: "◎" },
-  { id: "dashboard", label: "Monitoring", icon: "▤" },
-  { id: "playground", label: "LLM Lab", icon: "◑" },
-];
+export type MasterView = "gate" | "monitoring";
 
 export function AppShell() {
   const { user, loading, logout } = useAuth();
+  const { t } = useI18n();
   const [view, setView] = useState<MasterView>("gate");
 
   useEffect(() => {
     const fromHash = () => {
       const h = window.location.hash.replace("#", "");
-      if (h === "gate" || h === "dashboard" || h === "playground") setView(h);
+      if (h === "gate" || h === "monitoring" || h === "dashboard") {
+        setView(h === "dashboard" ? "monitoring" : h);
+      }
     };
     fromHash();
     window.addEventListener("hashchange", fromHash);
@@ -45,7 +40,7 @@ export function AppShell() {
           className="mono text-sm animate-pulse-soft"
           style={{ color: "var(--text-dim)" }}
         >
-          loading session…
+          {t.loading}
         </div>
       </div>
     );
@@ -53,11 +48,16 @@ export function AppShell() {
 
   if (!user) return <AuthView />;
 
+  const nav: { id: MasterView; label: string }[] = [
+    { id: "gate", label: t.navGate },
+    { id: "monitoring", label: t.navDecisions },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       <header
         className="flex items-center justify-between px-3 sm:px-5 h-14 border-b gap-2"
-        style={{ borderColor: "var(--border)", background: "var(--bg-elev)" }}
+        style={{ borderColor: "var(--border)", background: "var(--bg-elev-2)" }}
       >
         <div className="flex items-center gap-3 sm:gap-6 min-w-0">
           <div className="flex items-center gap-2 shrink-0">
@@ -67,30 +67,33 @@ export function AppShell() {
             >
               LG
             </span>
-            <span className="font-semibold text-sm hidden sm:block truncate display">
-              Listing Gate
-            </span>
+            <div className="hidden sm:block leading-tight">
+              <div className="font-semibold text-sm display">{t.brand}</div>
+              <div className="text-[10px]" style={{ color: "var(--text-faint)" }}>
+                {t.brandSub}
+              </div>
+            </div>
           </div>
-          <nav className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto">
-            {NAV.map((n) => (
+          <nav className="flex items-center gap-1">
+            {nav.map((n) => (
               <button
                 key={n.id}
                 type="button"
                 onClick={() => go(n.id)}
-                className="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
+                className="px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-colors"
                 style={{
                   background:
                     view === n.id ? "var(--accent-soft)" : "transparent",
-                  color: view === n.id ? "var(--text)" : "var(--text-dim)",
+                  color: view === n.id ? "var(--accent)" : "var(--text-dim)",
                 }}
               >
-                <span className="mr-1 opacity-70">{n.icon}</span>
                 {n.label}
               </button>
             ))}
           </nav>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <LanguageToggle />
           <span
             className="text-xs mono hidden md:block truncate max-w-[10rem]"
             style={{ color: "var(--text-faint)" }}
@@ -102,19 +105,13 @@ export function AppShell() {
             className="btn btn-ghost !py-1.5 !px-3"
             onClick={logout}
           >
-            Sign out
+            {t.signOut}
           </button>
         </div>
       </header>
 
       <main className="flex-1 min-h-0">
-        {view === "gate" ? (
-          <GateView />
-        ) : view === "dashboard" ? (
-          <DashboardView />
-        ) : (
-          <PlaygroundView />
-        )}
+        {view === "gate" ? <GateView /> : <DashboardView />}
       </main>
     </div>
   );
