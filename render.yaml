@@ -1,5 +1,11 @@
 # Render Blueprint — Listing & Claim Gate API
-# Database: Supabase (set DATABASE_URL manually). No Render-managed Postgres.
+# Temporary: Render managed Postgres (free). Swap DATABASE_URL to Supabase later.
+
+databases:
+  - name: listing-claim-gate-db
+    databaseName: listing_claim_gate
+    user: listing
+    plan: free
 
 services:
   - type: web
@@ -13,7 +19,9 @@ services:
     autoDeploy: true
     envVars:
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: listing-claim-gate-db
+          property: connectionString
       - key: JWT_SECRET
         generateValue: true
       - key: APP_ENV
@@ -24,6 +32,7 @@ services:
         value: 15m
       - key: REFRESH_TOKEN_TTL
         value: 168h
+      # Set after first Vercel deploy (no trailing slash)
       - key: CORS_ORIGINS
         sync: false
       - key: APP_NAME
@@ -34,6 +43,3 @@ services:
         value: "20"
       - key: REQUEST_TIMEOUT
         value: 15s
-      # Optional: real MLC or OpenAI-compatible base URL
-      - key: MLC_BASE_URL
-        sync: false
