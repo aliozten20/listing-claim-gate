@@ -55,7 +55,7 @@ Open the Vercel URL → create account → analyze a listing → check Decisions
 
 ```bash
 docker compose --profile full up --build -d
-# API :8080 · Grafana :3001 (admin/listing) · MLC stub :8000 · Prometheus :9090
+# API :8080 · Grafana :3002 (admin/listing) · MLC stub :8000 · Prometheus :9090
 cd frontend && npm run dev
 ```
 

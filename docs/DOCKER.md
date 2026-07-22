@@ -34,7 +34,7 @@ curl -s http://localhost:8080/health
 curl -s http://localhost:8080/metrics | head
 # Prometheus text metrics
 
-open http://localhost:3001   # Grafana (admin / listing) — profile full
+open http://localhost:3002   # Grafana (admin / listing) — profile full
 curl -s http://localhost:8000/health   # MLC stub — profile full
 ```
 
@@ -48,8 +48,10 @@ Docker Desktop → Containers also shows green/running status.
 | Postgres | 5432 |
 | MLC stub | 8000 |
 | Prometheus | 9090 |
-| Grafana | 3001 |
+| Grafana | **3002** (not 3000 — that is the Next.js app) |
 | Frontend (host) | 3000 |
+
+> If Grafana used to be mapped to 3001 and the UI looked like a stuck Next “Loading…” page, a second `npm run dev` was likely bound to 3001. Use **http://localhost:3002** for Grafana.
 
 ## Production note
 

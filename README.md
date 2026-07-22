@@ -57,7 +57,7 @@ Full demo (Grafana + MLC stub + Prometheus):
 
 ```bash
 docker compose --profile full up --build -d
-open http://localhost:3001   # Grafana admin / listing
+open http://localhost:3002   # Grafana admin / listing
 ```
 
 ## Product surface

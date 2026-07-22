@@ -14,7 +14,7 @@ See [DOCKER.md](./DOCKER.md).
 
 | Piece | Local | Production |
 |---|---|---|
-| Grafana | `:3001` with `--profile full` | Optional / self-host |
+| Grafana | `:3002` with `--profile full` | Optional / self-host |
 | MLC stub | `:8000` with `--profile full` | Set `MLC_BASE_URL` if you host real MLC |
 | Prometheus | scrapes API `/metrics` | API still exposes `/metrics` |
 

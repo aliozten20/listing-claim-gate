@@ -6,7 +6,7 @@
 |---|---|---|
 | **mlc-llm** | MLC-LLM runtime, Gemma model serve (OpenAI-compatible HTTP) | `8000` |
 | **backend** | MF Go API: auth, runs, Deci.Scoring, metrics export | `8080` |
-| **grafana** *(gözlem)* | LLM KPI dashboards (Prometheus veya Loki datasource) | `3001` |
+| **grafana** *(gözlem)* | LLM KPI dashboards (Prometheus veya Loki datasource) | `3002` |
 | **postgres** *(data)* | Run ledger / users (veya Supabase URL) | `5432` |
 
 Sunum cümlesi: **“İki iş container’ı — `mlc-llm` ve `backend` — konuşur; Grafana backend’in yayınladığı LLM KPI’larını sürekli izler.”**
