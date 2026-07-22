@@ -27,11 +27,17 @@ Replace Render `DATABASE_URL` with Supabase URI — see [SUPABASE.md](./SUPABASE
 
 ## Checklist (manual)
 
-1. Blueprint Apply (Render)  
-2. Note API URL  
-3. Vercel deploy + `NEXT_PUBLIC_API_URL`  
-4. Set `CORS_ORIGINS`  
+1. Blueprint Apply (Render) — done: `listing-claim-gate-api`
+2. Note API URL — https://listing-claim-gate-api.onrender.com
+3. Vercel deploy + `NEXT_PUBLIC_API_URL` — done
+4. Set `CORS_ORIGINS` — `https://listing-claim-gate.vercel.app`
 5. Register + Gate analyze in the live app
+
+## Live URLs
+
+- FE: https://listing-claim-gate.vercel.app
+- API: https://listing-claim-gate-api.onrender.com
+- Health: https://listing-claim-gate-api.onrender.com/health
 
 ## Local full stack (demo Grafana / MLC)
 

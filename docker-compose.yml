@@ -30,7 +30,7 @@ services:
       PORT: "8080"
       DATABASE_URL: postgres://listing:listing@postgres:5432/listing_claim_gate?sslmode=disable
       JWT_SECRET: dev-insecure-secret-change-me-but-32b-min!!
-      CORS_ORIGINS: http://localhost:3000
+      CORS_ORIGINS: http://localhost:3000,https://listing-claim-gate.vercel.app
       TRUST_PROXY: "false"
       REQUEST_TIMEOUT: 15s
       BCRYPT_COST: "12"

@@ -4,7 +4,7 @@ Go + Postgres backend for the MasterFabric capstone. Records LLM runs produced
 in the browser (WebLLM/Gemma) and grades them with a transparent, rule-based
 **Deci.Scoring** engine.
 
-- **Live API:** _pending Render deploy_
+- **Live API:** https://listing-claim-gate-api.onrender.com
 - **Frontend:** see [`frontend`](../frontend) → Vercel
 - **Stack:** Go 1.26 · chi router · pgx/Postgres · JWT · bcrypt
 

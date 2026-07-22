@@ -3,8 +3,8 @@
 Next.js SPA for the MasterFabric capstone: **marketplace listing** title/description
 → Deci.Scoring → **PASS / REVIEW / REJECT**.
 
-- **Live app:** _pending Vercel deploy_
-- **Live API:** _pending Render deploy_
+- **Live app:** https://listing-claim-gate.vercel.app
+- **Live API:** https://listing-claim-gate-api.onrender.com
 - **Stack:** Next.js · React · Tailwind
 
 ## Master views

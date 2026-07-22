@@ -1,5 +1,15 @@
 # Honest ops status — Listing & Claim Gate
 
+## Live production
+
+| Piece | URL |
+| --- | --- |
+| Frontend | https://listing-claim-gate.vercel.app |
+| API | https://listing-claim-gate-api.onrender.com |
+| Health | https://listing-claim-gate-api.onrender.com/health |
+
+Smoke (2026-07-23): `/health` 200, register 201, CORS for Vercel origin OK. Free Render Postgres expires ~2026-08-21 — migrate to Supabase before then.
+
 ## Docker
 
 **Yes.** `docker compose up --build -d` → Postgres + API.  
@@ -8,7 +18,7 @@ See [DOCKER.md](./DOCKER.md).
 
 ## Supabase
 
-**Yes (production DB).** Auth stays on Go. Wire `DATABASE_URL` from Supabase — [SUPABASE.md](./SUPABASE.md).
+**Planned (production DB swap).** Auth stays on Go. Wire `DATABASE_URL` from Supabase — [SUPABASE.md](./SUPABASE.md).
 
 ## Grafana / MLC
 

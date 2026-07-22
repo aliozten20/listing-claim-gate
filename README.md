@@ -23,9 +23,9 @@ Marketplace / D2C **listing title + description** gate: mock shop or manual past
 
 | | |
 | --- | --- |
-| **Live app (FE)** | _pending Vercel_ |
-| **Live API** | _pending Render_ |
-| **Health** | `_pending_/health` |
+| **Live app (FE)** | https://listing-claim-gate.vercel.app |
+| **Live API** | https://listing-claim-gate-api.onrender.com |
+| **Health** | https://listing-claim-gate-api.onrender.com/health |
 
 | Layer | Tech | Host |
 | --- | --- | --- |
