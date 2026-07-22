@@ -1,55 +1,37 @@
 # Deploy to production
 
-Stack: **Vercel (frontend)** + **Render (Go API)** + **Supabase (Postgres)**.
+Stack: **Vercel (frontend)** + **Render (Go API)** + **Postgres**  
+(First bootstrap uses **Render free Postgres**; swap `DATABASE_URL` to **Supabase** later.)
 
-## Checklist
+## One-click links (do these in order)
 
-1. Create Supabase project → copy `DATABASE_URL` ([SUPABASE.md](./SUPABASE.md))
-2. Deploy API on Render (Blueprint [`render.yaml`](../render.yaml) or manual)
-3. Set Render env: `DATABASE_URL`, `CORS_ORIGINS` (after step 5), `JWT_SECRET` (auto)
-4. Deploy frontend on Vercel (`frontend/` root, `NEXT_PUBLIC_API_URL`)
-5. Set Render `CORS_ORIGINS` to exact Vercel origin (no trailing slash)
-6. Smoke: register → Gate analyze → Decisions
+1. **Render API + DB (Blueprint)**  
+   https://dashboard.render.com/blueprint/new?repo=https://github.com/aliozten20/listing-claim-gate  
+   - Sign in with GitHub → Apply → wait until service is Live  
+   - Copy the API URL (e.g. `https://listing-claim-gate-api.onrender.com`)
 
-## 1. Supabase
+2. **Vercel frontend**  
+   - CLI: `cd frontend && vercel --prod` (after `vercel login`)  
+   - Or dashboard: https://vercel.com/new — import `aliozten20/listing-claim-gate`, **Root Directory = `frontend`**  
+   - Env: `NEXT_PUBLIC_API_URL` = Render API URL (no trailing slash)
 
-See [SUPABASE.md](./SUPABASE.md). Migrations run automatically when the API boots.
+3. **CORS**  
+   Render → Environment → `CORS_ORIGINS` = exact Vercel origin → Save (redeploy)
 
-## 2. Render (API)
+4. **Smoke**  
+   `curl https://YOUR-API.onrender.com/health`
 
-- Connect GitHub repo `aliozten20/listing-claim-gate`
-- Use Blueprint or create Web Service: root `backend`, build `go build -o app ./cmd/server`, start `./app`
-- Health check: `/health`
-- Env (required):
-  - `DATABASE_URL` = Supabase URI (`sslmode=require`)
-  - `APP_ENV=production`
-  - `TRUST_PROXY=true`
-  - `JWT_SECRET` = generate (≥32 bytes)
-  - `CORS_ORIGINS` = `https://YOUR-APP.vercel.app` (set after Vercel)
-  - `APP_NAME=Listing & Claim Gate`
-  - `MAX_CONCURRENT_INFERENCES=20`
-- Optional: `MLC_BASE_URL` if you host an OpenAI-compatible MLC endpoint
+## Later: Supabase
 
-## 3. Vercel (frontend)
+Replace Render `DATABASE_URL` with Supabase URI — see [SUPABASE.md](./SUPABASE.md). Auth stays on Go.
 
-- Root Directory: `frontend`
-- Framework: Next.js
-- Env: `NEXT_PUBLIC_API_URL=https://YOUR-API.onrender.com` (no trailing slash)
-- Deploy
+## Checklist (manual)
 
-## 4. Wire CORS
-
-Render → Environment → `CORS_ORIGINS` = your Vercel URL → save/redeploy.
-
-## 5. Verify
-
-```bash
-curl https://YOUR-API.onrender.com/health
-curl https://YOUR-API.onrender.com/ready
-curl https://YOUR-API.onrender.com/metrics | head
-```
-
-Open the Vercel URL → create account → analyze a listing → check Decisions.
+1. Blueprint Apply (Render)  
+2. Note API URL  
+3. Vercel deploy + `NEXT_PUBLIC_API_URL`  
+4. Set `CORS_ORIGINS`  
+5. Register + Gate analyze in the live app
 
 ## Local full stack (demo Grafana / MLC)
 
