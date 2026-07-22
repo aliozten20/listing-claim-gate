@@ -18,6 +18,9 @@ import type {
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 const ACCESS_KEY = "llm_access";
 const REFRESH_KEY = "llm_refresh";
+/** Render free tier can take ~30–90s to wake; retry network failures. */
+const NETWORK_RETRIES = 4;
+const NETWORK_RETRY_MS = 4000;
 
 export class ApiError extends Error {
   status: number;
@@ -27,6 +30,19 @@ export class ApiError extends Error {
     this.status = status;
     this.code = code;
   }
+}
+
+function networkUnreachableMessage(): string {
+  const isLocal =
+    BASE.includes("localhost") || BASE.includes("127.0.0.1");
+  if (isLocal) {
+    return `API unreachable (${BASE}). Start backend: docker compose up -d  or  cd backend && go run ./cmd/server`;
+  }
+  return `API waking up or unreachable (${BASE}). Wait ~1 minute and retry — Render free tier spins down when idle.`;
+}
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 function getAccess(): string | null {
@@ -62,7 +78,7 @@ async function parseError(res: Response): Promise<ApiError> {
   return new ApiError(res.status, code, message);
 }
 
-// Core request with one automatic refresh retry on 401.
+// Core request with network retries (cold start) + one refresh retry on 401.
 async function request<T>(
   path: string,
   init: RequestInit = {},
@@ -73,13 +89,26 @@ async function request<T>(
   const access = getAccess();
   if (access) headers.set("Authorization", `Bearer ${access}`);
 
-  const res = await fetch(`${BASE}${path}`, { ...init, headers }).catch(() => {
-    throw new ApiError(
-      0,
-      "network_error",
-      `API unreachable (${BASE}). Start backend: docker compose up -d  or  cd backend && go run ./cmd/server`,
-    );
-  });
+  let res: Response | undefined;
+  for (let attempt = 0; attempt <= NETWORK_RETRIES; attempt++) {
+    try {
+      res = await fetch(`${BASE}${path}`, { ...init, headers });
+      // Render free: brief 404 "no-server" while the instance is booting.
+      if (res.status === 404 && attempt < NETWORK_RETRIES) {
+        await sleep(NETWORK_RETRY_MS);
+        continue;
+      }
+      break;
+    } catch {
+      if (attempt >= NETWORK_RETRIES) {
+        throw new ApiError(0, "network_error", networkUnreachableMessage());
+      }
+      await sleep(NETWORK_RETRY_MS);
+    }
+  }
+  if (!res) {
+    throw new ApiError(0, "network_error", networkUnreachableMessage());
+  }
 
   if (res.status === 401 && retry && getRefresh()) {
     const refreshed = await tryRefresh();
