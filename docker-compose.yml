@@ -1,7 +1,8 @@
-# Local stack: Postgres + Go API (+ optional Grafana later)
-# Usage: docker compose up --build
+# Listing & Claim Gate — local stack
+# Core:  docker compose up --build -d
+# Full:  docker compose --profile full up --build -d   # + Grafana + MLC stub
 #
-# Frontend still runs on host: cd frontend && npm run dev
+# Frontend stays on host: cd frontend && npm run dev
 
 services:
   postgres:
@@ -35,14 +36,50 @@ services:
       BCRYPT_COST: "12"
       APP_NAME: Listing & Claim Gate
       APP_VERSION: "0.1.0"
+      MLC_BASE_URL: ""
+      MAX_CONCURRENT_INFERENCES: "20"
     depends_on:
       postgres:
         condition: service_healthy
 
-  # Optional observability — enable when metrics endpoint lands
-  # grafana:
-  #   image: grafana/grafana:11.2.0
-  #   ports: ["3001:3000"]
+  mlc:
+    profiles: ["full"]
+    build: ./infra/mlc
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  prometheus:
+    profiles: ["full"]
+    image: prom/prometheus:v2.54.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - backend
+
+  grafana:
+    profiles: ["full"]
+    image: grafana/grafana:11.2.0
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: listing
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_USERS_DEFAULT_THEME: light
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+      - backend
 
 volumes:
   pgdata:

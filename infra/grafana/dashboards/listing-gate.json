@@ -1,0 +1,67 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Analyze outcomes",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "listing_gate_analyze_pass_total", "legendFormat": "PASS", "refId": "A" },
+        { "expr": "listing_gate_analyze_review_total", "legendFormat": "REVIEW", "refId": "B" },
+        { "expr": "listing_gate_analyze_reject_total", "legendFormat": "REJECT", "refId": "C" }
+      ]
+    },
+    {
+      "title": "Inference slots (active / max)",
+      "type": "gauge",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        { "expr": "listing_gate_inference_slots_active", "legendFormat": "active", "refId": "A" },
+        { "expr": "listing_gate_inference_slots_max", "legendFormat": "max", "refId": "B" }
+      ],
+      "fieldConfig": {
+        "defaults": { "min": 0, "max": 20, "thresholds": { "mode": "absolute", "steps": [
+          { "color": "green", "value": null },
+          { "color": "yellow", "value": 14 },
+          { "color": "red", "value": 18 }
+        ] } }
+      }
+    },
+    {
+      "title": "Capacity rejected (switch-out killer)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        { "expr": "listing_gate_capacity_rejected_total", "legendFormat": "503s", "refId": "A" }
+      ]
+    },
+    {
+      "title": "Avg analyze latency (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "targets": [
+        { "expr": "listing_gate_analyze_latency_ms_avg", "legendFormat": "avg ms", "refId": "A" }
+      ]
+    },
+    {
+      "title": "HTTP requests",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "targets": [
+        { "expr": "rate(listing_gate_http_requests_total[1m])", "legendFormat": "req/s", "refId": "A" }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["listing-gate", "deci"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "Listing Gate KPIs",
+  "uid": "listing-gate-kpis",
+  "version": 1
+}
