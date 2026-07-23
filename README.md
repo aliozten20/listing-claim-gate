@@ -53,7 +53,8 @@ Marketplace / D2C **listing title + description** gate: mock shop or manual past
 | --- | --- |
 | [docs/DOCKER.md](./docs/DOCKER.md) | Why Docker + how to verify running services |
 | [docs/OBSERVABILITY.md](./docs/OBSERVABILITY.md) | Local + prod Grafana / Prometheus |
-| [docs/ORIGIN.md](./docs/ORIGIN.md) | Not a fork of masterfabric-go — how the backend was built |
+| [docs/ORIGIN.md](./docs/ORIGIN.md) | Based on masterfabric-go-backend (+ fork) |
+| [docs/WORKER.md](./docs/WORKER.md) | Local MLC + Caddy + Cloudflare tunnel → Render |
 | [docs/DEPLOY.md](./docs/DEPLOY.md) | Vercel + Render (+ later Supabase) |
 | [docs/SUPABASE.md](./docs/SUPABASE.md) | Swap production DB to Supabase |
 | [docs/METRICS.md](./docs/METRICS.md) | Gate metric meanings + good ranges |

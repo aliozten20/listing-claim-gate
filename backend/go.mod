@@ -1,4 +1,4 @@
-module github.com/aliozten/llm-monitoring/backend
+module github.com/aliozten20/listing-claim-gate/backend
 
 go 1.26.5
 

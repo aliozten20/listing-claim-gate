@@ -87,6 +87,7 @@ export const en = {
     "Restrictive return language can hurt trust and compliance.",
   insight_passed_basic: "Listing passed basic quality checks.",
   insight_risky_claims: "Unsubstantiated / high-risk claim signal: {claims}",
+  insight_mlc_enrichment: "Enriched via worker MLC (Render → tunnel → local).",
 
   flag_missing_title: "Missing title",
   flag_missing_description: "Missing description",
@@ -279,6 +280,7 @@ export const tr: Messages = {
     "Kısıtlayıcı iade dili güveni ve uyumu zayıflatabilir.",
   insight_passed_basic: "Listing temel kalite kontrollerini geçti.",
   insight_risky_claims: "Kanıtsız / yüksek riskli iddia sinyali: {claims}",
+  insight_mlc_enrichment: "Worker MLC ile zenginleştirildi (Render → tunnel → lokal).",
 
   flag_missing_title: "Başlık eksik",
   flag_missing_description: "Açıklama eksik",

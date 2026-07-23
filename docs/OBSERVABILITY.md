@@ -1,5 +1,11 @@
 # Observability — local + production
 
+## Worker MLC edge
+
+Student laptop runs MLC behind Caddy; Cloudflare tunnel exposes only the proxy.  
+Render API authenticates `/v1/mlc/*` and reverse-proxies to `MLC_BASE_URL`.  
+See [WORKER.md](./WORKER.md).
+
 ## Local (`docker compose --profile full`)
 
 | Service | URL |

@@ -42,6 +42,9 @@ services:
         value: "20"
       - key: REQUEST_TIMEOUT
         value: 15s
+      # Local worker tunnel hostname (Cloudflare). Leave empty for rules-only Gate.
+      - key: MLC_BASE_URL
+        sync: false
 
   # Scrapes https://listing-claim-gate-api.onrender.com/metrics
   - type: web

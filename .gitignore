@@ -4,6 +4,10 @@
 **/.env
 **/.env.local
 **/.env.*.local
+infra/worker/.env
+
+# Local clones / forks (not part of delivery tree)
+.refs/
 
 # Node / Next.js
 **/node_modules/

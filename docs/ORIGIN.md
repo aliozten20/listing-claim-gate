@@ -1,25 +1,27 @@
-# Origin — how this repo relates to MasterFabric Go
+# Origin — MasterFabric Go backend base
 
-## Did we fork `masterfabric-go`?
+## Base template
 
-**No.** This backend is **not** a fork of
-[gurkanfikretgunak/masterfabric-go](https://github.com/gurkanfikretgunak/masterfabric-go).
+This product backend is built on the Academy template:
 
-| Check | This project |
-| --- | --- |
-| GitHub remote | `https://github.com/aliozten20/listing-claim-gate` |
-| Go module | `github.com/aliozten/llm-monitoring/backend` |
-| Fork of masterfabric-go | ❌ |
-| Git submodule / vendor copy of that repo | ❌ |
+- Upstream: https://github.com/mervegundogdu/masterfabric-go-backend
+- Working fork: https://github.com/aliozten20/masterfabric-go-backend
 
-## What we did use from the Academy orbit
+Layout follows that clean architecture:
 
-- **Capstone product brief / gist** from MasterFabric Academy (see [PLAN.md](./PLAN.md)).
-- **Architectural habits** common in Academy Go backends: chi router, JWT auth + refresh sessions, Postgres, layered `cmd/` + `internal/`, health/config endpoints — **reimplemented** for Listing & Claim Gate.
-- **Not** a line-by-line port of multi-tenant RBAC SaaS platform code from `masterfabric-go`.
+`cmd/server` · `internal/domain` · `internal/application` · `internal/infrastructure` · `internal/shared`
 
-Product surface (Gate / Deci.Scoring / mock shop) and the commerce UI are original to this repo.
+Go module (this monorepo): `github.com/aliozten20/listing-claim-gate/backend`
 
-## How to describe it to mentors
+See also [`backend/PLATFORM.md`](../backend/PLATFORM.md).
 
-> Greenfield Go + Next.js app for the Academy Listing & Claim Gate brief. Inspired by MasterFabric Go service layout conventions; **not** a fork of `masterfabric-go`.
+## What we added on top
+
+- Listing & Claim Gate domain (mock shop, analyze, Deci.Scoring commerce dims)
+- FE-compatible routes: `/auth`, `/llm`, `/health`, `/metrics`, `/config`, `/ready`
+- Authenticated MLC edge: ` /v1/mlc/*` reverse-proxy → local worker tunnel (`MLC_BASE_URL`)
+- Redis/Kafka from the template are **optional** on Render free (reported as `skipped` in `/ready`)
+
+## Worker / MLC edge
+
+MLC stays on the student machine. Network flow is always via Render — see [WORKER.md](./WORKER.md).

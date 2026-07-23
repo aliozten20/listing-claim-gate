@@ -1,6 +1,6 @@
-// Command server is the entrypoint for the Raw LLM Monitoring & Decision
-// Scoring backend. It wires configuration, the database, middleware and the
-// module routers, then serves HTTP with graceful shutdown.
+// Command server is the entrypoint for the Listing & Claim Gate backend.
+// It wires configuration, the database, middleware and the module routers,
+// then serves HTTP with graceful shutdown.
 package main
 
 import (
@@ -13,15 +13,16 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/aliozten/llm-monitoring/backend/internal/auth"
-	"github.com/aliozten/llm-monitoring/backend/internal/common"
-	"github.com/aliozten/llm-monitoring/backend/internal/config"
-	"github.com/aliozten/llm-monitoring/backend/internal/docs"
-	"github.com/aliozten/llm-monitoring/backend/internal/llm"
-	"github.com/aliozten/llm-monitoring/backend/internal/metrics"
-	"github.com/aliozten/llm-monitoring/backend/migrations"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/aliozten20/listing-claim-gate/backend/internal/infrastructure/http/handler/auth"
+	confighandler "github.com/aliozten20/listing-claim-gate/backend/internal/infrastructure/http/handler/config"
+	listinghandler "github.com/aliozten20/listing-claim-gate/backend/internal/infrastructure/http/handler/listing"
+	"github.com/aliozten20/listing-claim-gate/backend/internal/infrastructure/http/router"
+	"github.com/aliozten20/listing-claim-gate/backend/internal/infrastructure/mlc"
+	"github.com/aliozten20/listing-claim-gate/backend/internal/infrastructure/postgres"
+	"github.com/aliozten20/listing-claim-gate/backend/internal/shared/common"
+	"github.com/aliozten20/listing-claim-gate/backend/internal/shared/config"
+	"github.com/aliozten20/listing-claim-gate/backend/internal/shared/metrics"
+	"github.com/aliozten20/listing-claim-gate/backend/migrations"
 	"github.com/joho/godotenv"
 )
 
@@ -68,13 +69,13 @@ func main() {
 	}
 	slog.Info("database ready, migrations applied")
 
-	// ---- dependency wiring (constructor injection, Go Day 46) ----
+	// ---- dependency wiring (constructor injection) ----
 	tokens := auth.NewTokenService(cfg.JWTSecret, cfg.AccessTokenTTL, cfg.RefreshTokenTTL)
-	authStore := auth.NewStore(pool)
+	authStore := postgres.NewAuthStore(pool)
 	authHandler := auth.NewHandler(authStore, tokens, cfg.BcryptCost)
 
-	llmStore := llm.NewStore(pool)
-	llmHandler := llm.NewHandler(llmStore)
+	llmStore := postgres.NewListingStore(pool)
+	llmHandler := listinghandler.NewHandler(llmStore)
 
 	reg := metrics.New(cfg.MaxConcurrentInferences)
 	llmHandler.SetAnalyzeHook(reg.ObserveAnalyze)
@@ -85,7 +86,11 @@ func main() {
 		reg.SetActiveSlots,
 	)
 
-	cfgHandler := config.NewHandler(cfg)
+	cfgHandler := confighandler.NewHandler(cfg)
+
+	mlcClient := mlc.NewClient(cfg.MLCBaseURL)
+	mlcProxy := mlc.NewProxyHandler(cfg.MLCBaseURL)
+	llmHandler.SetMLC(mlcClient)
 
 	// Background workers share one context so shutdown stops all of them.
 	workerCtx, stopWorker := context.WithCancel(context.Background())
@@ -95,69 +100,29 @@ func main() {
 	// steady 1 request every 2s. Enough for real logins, hostile to brute force.
 	authLimiter := common.NewRateLimiter(workerCtx, 0.5, 10)
 
-	// ---- router ----
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	// RealIP rewrites RemoteAddr from X-Forwarded-For, which is only meaningful
-	// — and only safe — when a proxy we control has already set that header.
-	// Mounting it on a directly-exposed instance would hand every caller
-	// control of their own apparent IP.
-	if cfg.TrustProxy {
-		r.Use(middleware.RealIP)
-	}
-	r.Use(common.RequestLogger)
-	r.Use(common.Recover)
-	r.Use(common.SecurityHeaders)
-	// Bound every request before any handler runs, so the deadline reaches the
-	// database driver and a stalled query cannot hold a pooled connection open.
-	r.Use(common.Timeout(cfg.RequestTimeout))
-	r.Use(common.CORS(cfg.CORSOrigins))
-	r.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			reg.IncHTTP()
-			next.ServeHTTP(w, req)
-		})
+	handler := router.New(router.Dependencies{
+		Cfg:         cfg,
+		Pool:        pool,
+		Auth:        authHandler,
+		Tokens:      tokens,
+		LLM:         llmHandler,
+		Config:      cfgHandler,
+		Metrics:     reg,
+		AuthLimiter: authLimiter.Middleware,
+		Capacity:    capacity.Middleware,
+		MLC:         mlcClient,
+		MLCProxy:    mlcProxy,
 	})
-
-	// Config module
-	r.Get("/config", cfgHandler.Config)
-	r.Get("/version", cfgHandler.Version)
-
-	// API documentation
-	r.Get("/openapi.yaml", docs.SpecYAML)
-	r.Get("/docs", docs.Reference)
-
-	// Prometheus text metrics (scraped by Grafana)
-	r.Get("/metrics", reg.Handler())
-
-	// Common module — liveness & readiness
-	r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
-		common.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
-	})
-	r.Get("/ready", func(w http.ResponseWriter, req *http.Request) {
-		pingCtx, cancel := context.WithTimeout(req.Context(), 2*time.Second)
-		defer cancel()
-		if err := pool.Ping(pingCtx); err != nil {
-			common.Error(w, common.ErrInternal("database unavailable"))
-			return
-		}
-		payload := map[string]any{"status": "ready", "mlc_configured": cfg.MLCBaseURL != ""}
-		common.JSON(w, http.StatusOK, payload)
-	})
-
-	// Feature modules
-	r.Mount("/auth", authHandler.Routes(tokens.Verify, authLimiter.Middleware))
-	r.Mount("/llm", llmHandler.Routes(tokens.Verify, capacity.Middleware))
 
 	if cfg.MLCBaseURL != "" {
-		slog.Info("MLC endpoint configured", "url", cfg.MLCBaseURL)
+		slog.Info("MLC worker edge configured", "url", cfg.MLCBaseURL, "proxy", "/v1/mlc/*")
 	} else {
-		slog.Info("MLC_BASE_URL unset — Gate uses listing-rules engine; set URL to attach MLC")
+		slog.Info("MLC_BASE_URL unset — Gate uses listing-rules; set tunnel URL to attach worker MLC")
 	}
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,
-		Handler: r,
+		Handler: handler,
 		// Every phase of a connection needs a bound. ReadHeaderTimeout alone
 		// leaves body reads and response writes unbounded, so a client that
 		// stalls mid-transfer pins a goroutine and its database connection
@@ -174,7 +139,7 @@ func main() {
 	// ---- background: periodically reap expired/revoked sessions ----
 	go sessionCleanup(workerCtx, authStore)
 
-	// ---- serve with graceful shutdown (Go Day 36-40) ----
+	// ---- serve with graceful shutdown ----
 	go func() {
 		slog.Info("server listening", "app", cfg.AppName, "port", cfg.Port, "env", cfg.Env)
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -200,7 +165,7 @@ func main() {
 // sessionCleanup deletes expired and long-revoked sessions on a fixed interval
 // (and once at startup) so the sessions table doesn't grow without bound. It
 // exits promptly when its context is cancelled during shutdown.
-func sessionCleanup(ctx context.Context, store *auth.Store) {
+func sessionCleanup(ctx context.Context, store *postgres.AuthStore) {
 	const interval = time.Hour
 
 	reap := func() {

@@ -1,0 +1,9 @@
+# Reverse-proxy in front of local MLC. Only this port should be tunnelled.
+:8088 {
+	encode gzip
+	reverse_proxy mlc:8000
+	log {
+		output stdout
+		format console
+	}
+}

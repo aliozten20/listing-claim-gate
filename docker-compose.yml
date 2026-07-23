@@ -1,8 +1,10 @@
 # Listing & Claim Gate — local stack
-# Core:  docker compose up --build -d
-# Full:  docker compose --profile full up --build -d   # + Grafana + MLC stub
+# Core:    docker compose up --build -d
+# Full:    docker compose --profile full up --build -d   # + Grafana + Prometheus + MLC
+# Worker:  docker compose --profile worker up --build -d # MLC + Caddy + cloudflared tunnel
 #
 # Frontend stays on host: cd frontend && npm run dev
+# Worker docs: docs/WORKER.md
 
 services:
   postgres:
@@ -36,14 +38,15 @@ services:
       BCRYPT_COST: "12"
       APP_NAME: Listing & Claim Gate
       APP_VERSION: "0.1.0"
-      MLC_BASE_URL: ""
+      # Host reaches Caddy on :8088 when --profile worker is up; empty disables MLC
+      MLC_BASE_URL: ${MLC_BASE_URL:-http://host.docker.internal:8088}
       MAX_CONCURRENT_INFERENCES: "20"
     depends_on:
       postgres:
         condition: service_healthy
 
   mlc:
-    profiles: ["full"]
+    profiles: ["full", "worker"]
     build: ./infra/mlc
     ports:
       - "8000:8000"
@@ -52,6 +55,27 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  mlc-proxy:
+    profiles: ["worker"]
+    image: caddy:2.8-alpine
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./infra/worker/Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      mlc:
+        condition: service_healthy
+
+  tunnel:
+    profiles: ["worker"]
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+      - mlc-proxy
+    restart: unless-stopped
 
   prometheus:
     profiles: ["full"]
@@ -69,7 +93,6 @@ services:
       context: ./infra/grafana
       dockerfile: Dockerfile
     ports:
-      # Host 3002 — 3000 is Next.js FE; 3001 is often taken by a second `next dev`
       - "3002:3000"
     environment:
       GF_SECURITY_ADMIN_USER: admin

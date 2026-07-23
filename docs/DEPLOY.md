@@ -38,6 +38,12 @@ Replace Render `DATABASE_URL` with Supabase URI — see [SUPABASE.md](./SUPABASE
 - FE: https://listing-claim-gate.vercel.app
 - API: https://listing-claim-gate-api.onrender.com
 - Health: https://listing-claim-gate-api.onrender.com/health
+- Grafana: https://listing-claim-gate-grafana.onrender.com
+
+## Worker MLC (laptop)
+
+MLC stays on your machine; Render proxies `/v1/mlc/*` to `MLC_BASE_URL` (tunnel).  
+See [WORKER.md](./WORKER.md).
 
 ## Local full stack (demo Grafana / MLC)
 
@@ -47,4 +53,10 @@ docker compose --profile full up --build -d
 cd frontend && npm run dev
 ```
 
-See [DOCKER.md](./DOCKER.md).
+Worker edge (Caddy + tunnel):
+
+```bash
+docker compose --profile worker up --build -d
+```
+
+See [DOCKER.md](./DOCKER.md) and [ORIGIN.md](./ORIGIN.md).
