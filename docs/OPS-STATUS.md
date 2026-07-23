@@ -7,6 +7,8 @@
 | Frontend | https://listing-claim-gate.vercel.app |
 | API | https://listing-claim-gate-api.onrender.com |
 | Health | https://listing-claim-gate-api.onrender.com/health |
+| Grafana (prod) | https://listing-claim-gate-grafana.onrender.com |
+| Prometheus (prod) | https://listing-claim-gate-prometheus.onrender.com |
 
 Smoke (2026-07-23): `/health` 200, register 201, CORS for Vercel origin OK. Free Render Postgres expires ~2026-08-21 — migrate to Supabase before then.
 

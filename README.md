@@ -26,6 +26,8 @@ Marketplace / D2C **listing title + description** gate: mock shop or manual past
 | **Live app (FE)** | https://listing-claim-gate.vercel.app |
 | **Live API** | https://listing-claim-gate-api.onrender.com |
 | **Health** | https://listing-claim-gate-api.onrender.com/health |
+| **Grafana (prod)** | https://listing-claim-gate-grafana.onrender.com |
+| **Prometheus (prod)** | https://listing-claim-gate-prometheus.onrender.com |
 
 | Layer | Tech | Host |
 | --- | --- | --- |
