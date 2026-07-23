@@ -11,9 +11,9 @@
       "type": "stat",
       "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
       "targets": [
-        { "expr": "listing_gate_analyze_pass_total", "legendFormat": "PASS", "refId": "A" },
-        { "expr": "listing_gate_analyze_review_total", "legendFormat": "REVIEW", "refId": "B" },
-        { "expr": "listing_gate_analyze_reject_total", "legendFormat": "REJECT", "refId": "C" }
+        { "expr": "listing_gate_analyze_pass_total{job=~\"$job\"}", "legendFormat": "PASS", "refId": "A" },
+        { "expr": "listing_gate_analyze_review_total{job=~\"$job\"}", "legendFormat": "REVIEW", "refId": "B" },
+        { "expr": "listing_gate_analyze_reject_total{job=~\"$job\"}", "legendFormat": "REJECT", "refId": "C" }
       ]
     },
     {
@@ -21,8 +21,8 @@
       "type": "gauge",
       "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
       "targets": [
-        { "expr": "listing_gate_inference_slots_active", "legendFormat": "active", "refId": "A" },
-        { "expr": "listing_gate_inference_slots_max", "legendFormat": "max", "refId": "B" }
+        { "expr": "listing_gate_inference_slots_active{job=~\"$job\"}", "legendFormat": "active", "refId": "A" },
+        { "expr": "listing_gate_inference_slots_max{job=~\"$job\"}", "legendFormat": "max", "refId": "B" }
       ],
       "fieldConfig": {
         "defaults": { "min": 0, "max": 20, "thresholds": { "mode": "absolute", "steps": [
@@ -37,7 +37,7 @@
       "type": "stat",
       "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
       "targets": [
-        { "expr": "listing_gate_capacity_rejected_total", "legendFormat": "503s", "refId": "A" }
+        { "expr": "listing_gate_capacity_rejected_total{job=~\"$job\"}", "legendFormat": "503s", "refId": "A" }
       ]
     },
     {
@@ -45,7 +45,7 @@
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
       "targets": [
-        { "expr": "listing_gate_analyze_latency_ms_avg", "legendFormat": "avg ms", "refId": "A" }
+        { "expr": "listing_gate_analyze_latency_ms_avg{job=~\"$job\"}", "legendFormat": "avg ms", "refId": "A" }
       ]
     },
     {
@@ -53,15 +53,30 @@
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
       "targets": [
-        { "expr": "rate(listing_gate_http_requests_total[1m])", "legendFormat": "req/s", "refId": "A" }
+        { "expr": "rate(listing_gate_http_requests_total{job=~\"$job\"}[1m])", "legendFormat": "req/s", "refId": "A" }
       ]
     }
   ],
   "schemaVersion": 39,
   "tags": ["listing-gate", "deci"],
-  "templating": { "list": [] },
+  "templating": {
+    "list": [
+      {
+        "name": "job",
+        "type": "query",
+        "label": "Environment",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(listing_gate_http_requests_total, job)",
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "current": { "text": "All", "value": "$__all" },
+        "refresh": 2
+      }
+    ]
+  },
   "time": { "from": "now-1h", "to": "now" },
   "title": "Listing Gate KPIs",
   "uid": "listing-gate-kpis",
-  "version": 1
+  "version": 2
 }

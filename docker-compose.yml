@@ -65,7 +65,9 @@ services:
 
   grafana:
     profiles: ["full"]
-    image: grafana/grafana:11.2.0
+    build:
+      context: ./infra/grafana
+      dockerfile: Dockerfile
     ports:
       # Host 3002 — 3000 is Next.js FE; 3001 is often taken by a second `next dev`
       - "3002:3000"
@@ -76,10 +78,8 @@ services:
       GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
       GF_USERS_DEFAULT_THEME: light
       GF_SERVER_ROOT_URL: http://localhost:3002
-      GF_SERVER_HTTP_PORT: "3000"
-    volumes:
-      - ./infra/grafana/provisioning:/etc/grafana/provisioning
-      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards
+      PORT: "3000"
+      PROMETHEUS_URL: http://prometheus:9090
     depends_on:
       - prometheus
       - backend

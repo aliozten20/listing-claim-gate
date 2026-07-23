@@ -1,0 +1,12 @@
+# Prometheus on Render — scrapes the live Listing Gate API only.
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: listing-gate-api-prod
+    metrics_path: /metrics
+    scheme: https
+    static_configs:
+      - targets: ["listing-claim-gate-api.onrender.com"]
+        labels:
+          env: prod

@@ -32,7 +32,7 @@ Marketplace / D2C **listing title + description** gate: mock shop or manual past
 | Frontend | Next.js SPA (EN default + TR) | **Vercel** |
 | Backend | Go API (≥20 endpoints) | **Render** |
 | Database | Postgres | **Render free DB** (first live) → **Supabase** later |
-| Observability | Prometheus `/metrics` + Grafana | Docker `--profile full` (`:3002`) |
+| Observability | Prometheus `/metrics` + Grafana | Local `:3002` **and** Render (see [OBSERVABILITY.md](./docs/OBSERVABILITY.md)) |
 | Inference demo | MLC OpenAI-compatible stub | Docker `--profile full` (`:8000`) |
 
 ## Links for mentors / delivery
@@ -50,6 +50,8 @@ Marketplace / D2C **listing title + description** gate: mock shop or manual past
 | Doc | Topic |
 | --- | --- |
 | [docs/DOCKER.md](./docs/DOCKER.md) | Why Docker + how to verify running services |
+| [docs/OBSERVABILITY.md](./docs/OBSERVABILITY.md) | Local + prod Grafana / Prometheus |
+| [docs/ORIGIN.md](./docs/ORIGIN.md) | Not a fork of masterfabric-go — how the backend was built |
 | [docs/DEPLOY.md](./docs/DEPLOY.md) | Vercel + Render (+ later Supabase) |
 | [docs/SUPABASE.md](./docs/SUPABASE.md) | Swap production DB to Supabase |
 | [docs/METRICS.md](./docs/METRICS.md) | Gate metric meanings + good ranges |

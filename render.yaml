@@ -1,5 +1,5 @@
-# Render Blueprint — Listing & Claim Gate API
-# Temporary: Render managed Postgres (free). Swap DATABASE_URL to Supabase later.
+# Render Blueprint — Listing & Claim Gate
+# API + free Postgres + Prometheus + Grafana (prod observability)
 
 databases:
   - name: listing-claim-gate-db
@@ -32,7 +32,6 @@ services:
         value: 15m
       - key: REFRESH_TOKEN_TTL
         value: 168h
-      # Live Vercel origin (no trailing slash)
       - key: CORS_ORIGINS
         value: https://listing-claim-gate.vercel.app
       - key: APP_NAME
@@ -43,3 +42,37 @@ services:
         value: "20"
       - key: REQUEST_TIMEOUT
         value: 15s
+
+  # Scrapes https://listing-claim-gate-api.onrender.com/metrics
+  - type: web
+    name: listing-claim-gate-prometheus
+    runtime: docker
+    plan: free
+    dockerfilePath: ./infra/prometheus/Dockerfile
+    dockerContext: ./infra/prometheus
+    autoDeploy: true
+    healthCheckPath: /-/ready
+
+  # Dashboards → Prometheus (Render private DNS)
+  - type: web
+    name: listing-claim-gate-grafana
+    runtime: docker
+    plan: free
+    dockerfilePath: ./infra/grafana/Dockerfile
+    dockerContext: ./infra/grafana
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      - key: PROMETHEUS_URL
+        # Public URL works on Render free (no private-network requirement)
+        value: https://listing-claim-gate-prometheus.onrender.com
+      - key: GF_SECURITY_ADMIN_USER
+        value: admin
+      - key: GF_SECURITY_ADMIN_PASSWORD
+        generateValue: true
+      - key: GF_AUTH_ANONYMOUS_ENABLED
+        value: "true"
+      - key: GF_AUTH_ANONYMOUS_ORG_ROLE
+        value: Viewer
+      - key: GF_SERVER_ROOT_URL
+        value: https://listing-claim-gate-grafana.onrender.com

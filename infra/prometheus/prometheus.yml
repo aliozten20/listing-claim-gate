@@ -2,7 +2,19 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: listing-gate-api
+  # Local Docker API (compose service name)
+  - job_name: listing-gate-api-local
     metrics_path: /metrics
     static_configs:
       - targets: ["backend:8080"]
+        labels:
+          env: local
+
+  # Production Render API (reachable from host/compose network)
+  - job_name: listing-gate-api-prod
+    metrics_path: /metrics
+    scheme: https
+    static_configs:
+      - targets: ["listing-claim-gate-api.onrender.com"]
+        labels:
+          env: prod

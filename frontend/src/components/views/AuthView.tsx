@@ -71,6 +71,8 @@ export function AuthView() {
     <div className="auth-root">
       <aside className="auth-brand">
         <div className="auth-brand-wash" />
+        <div className="auth-orb auth-orb--a" aria-hidden />
+        <div className="auth-orb auth-orb--b" aria-hidden />
         <div className="auth-brand-inner">
           <div className="auth-brand-top">
             <span className="auth-mark" aria-hidden>

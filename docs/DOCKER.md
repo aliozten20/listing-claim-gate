@@ -55,5 +55,6 @@ Docker Desktop → Containers also shows green/running status.
 
 ## Production note
 
-On Render you usually run **only the API**. Database = **Supabase**.  
-MLC/Grafana are for local/demo unless you host them separately (`MLC_BASE_URL`).
+Render Blueprint deploys **API + Postgres + Prometheus + Grafana**.  
+See [OBSERVABILITY.md](./OBSERVABILITY.md). Swap DB to Supabase later (`SUPABASE.md`).
+MLC stub remains local-only unless you host it and set `MLC_BASE_URL`.

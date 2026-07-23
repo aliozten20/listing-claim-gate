@@ -161,12 +161,45 @@ body {
 
 /* ── Auth (award-style SaaS split) ── */
 @keyframes auth-rise {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes auth-row-in {
-  from { opacity: 0; transform: translateX(12px); }
+  from { opacity: 0; transform: translateX(16px); }
   to { opacity: 1; transform: translateX(0); }
+}
+@keyframes auth-wash-drift {
+  0% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.06) translate(2%, -1%); }
+  100% { transform: scale(1) translate(0, 0); }
+}
+@keyframes auth-orb-a {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.55; }
+  50% { transform: translate(12%, 8%) scale(1.15); opacity: 0.85; }
+}
+@keyframes auth-orb-b {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+  50% { transform: translate(-10%, -14%) scale(1.2); opacity: 0.7; }
+}
+@keyframes auth-hero-in {
+  from { opacity: 0; transform: translateY(22px); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes auth-bar-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes auth-mark-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.35); }
+  50% { box-shadow: 0 0 0 10px rgba(20, 184, 166, 0); }
+}
+@keyframes auth-field-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes auth-shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
 
 .auth-root {
@@ -178,7 +211,7 @@ body {
 
 .auth-brand {
   position: relative;
-  overflow: auto;
+  overflow: hidden;
   color: #ecfdf5;
   background: #0a2e2b;
   padding: 1.25rem 1.25rem 1.5rem;
@@ -186,12 +219,38 @@ body {
 
 .auth-brand-wash {
   position: absolute;
-  inset: 0;
+  inset: -8%;
   background:
     radial-gradient(ellipse 80% 60% at 20% 0%, rgba(45, 212, 191, 0.22), transparent 55%),
     radial-gradient(ellipse 70% 50% at 100% 80%, rgba(217, 119, 6, 0.12), transparent 50%),
     linear-gradient(165deg, #0a2e2b 0%, #134e4a 48%, #0f3d3a 100%);
+  background-size: 140% 140%;
+  animation: auth-wash-drift 18s ease-in-out infinite;
   pointer-events: none;
+}
+
+.auth-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 0;
+}
+.auth-orb--a {
+  width: min(42vw, 22rem);
+  height: min(42vw, 22rem);
+  top: -8%;
+  left: -6%;
+  background: rgba(45, 212, 191, 0.28);
+  animation: auth-orb-a 12s ease-in-out infinite;
+}
+.auth-orb--b {
+  width: min(36vw, 18rem);
+  height: min(36vw, 18rem);
+  right: -4%;
+  bottom: 8%;
+  background: rgba(251, 191, 36, 0.16);
+  animation: auth-orb-b 15s ease-in-out infinite;
 }
 
 .auth-brand-inner {
@@ -208,6 +267,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.65rem;
+  animation: auth-hero-in 0.7s ease both;
 }
 
 .auth-mark {
@@ -221,6 +281,7 @@ body {
   font-weight: 800;
   font-size: 0.85rem;
   letter-spacing: -0.03em;
+  animation: auth-mark-glow 2.8s ease-in-out infinite;
 }
 .auth-mark--sm {
   width: 2rem;
@@ -243,6 +304,7 @@ body {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: rgba(204, 251, 241, 0.7);
+  animation: auth-hero-in 0.75s ease 0.08s both;
 }
 
 .auth-display {
@@ -253,10 +315,17 @@ body {
   line-height: 1.12;
   letter-spacing: -0.03em;
   color: #f0fdfa;
+  animation: auth-hero-in 0.85s ease 0.14s both;
 }
 .auth-display-line {
   display: block;
   color: #5eead4;
+  background: linear-gradient(100deg, #5eead4, #99f6e4, #5eead4);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: auth-shimmer 6s linear infinite;
 }
 
 .auth-lede {
@@ -265,6 +334,7 @@ body {
   line-height: 1.55;
   color: rgba(204, 251, 241, 0.78);
   max-width: 28rem;
+  animation: auth-hero-in 0.9s ease 0.22s both;
 }
 
 .auth-preview {
@@ -285,7 +355,13 @@ body {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
-  animation: auth-row-in 0.55s ease both;
+  animation: auth-row-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+}
+.auth-preview-row:hover {
+  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(94, 234, 212, 0.28);
 }
 .auth-preview-meta {
   grid-column: 1 / -1;
@@ -311,6 +387,8 @@ body {
   height: 100%;
   border-radius: inherit;
   background: #5eead4;
+  transform-origin: left center;
+  animation: auth-bar-fill 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .auth-preview-row--reject .auth-preview-bar i { background: #fb7185; }
 .auth-preview-row--review .auth-preview-bar i { background: #fbbf24; }
@@ -344,6 +422,7 @@ body {
   margin: 0;
   font-size: 0.68rem;
   color: rgba(153, 246, 228, 0.45);
+  animation: auth-hero-in 1s ease 0.35s both;
 }
 
 .auth-form-plane {
@@ -369,7 +448,7 @@ body {
 }
 
 .auth-rise {
-  animation: auth-rise 0.5s ease both;
+  animation: auth-rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .auth-tabs {
@@ -380,6 +459,7 @@ body {
   border-radius: 999px;
   background: #eef3f6;
   margin-bottom: 1.5rem;
+  animation: auth-field-in 0.55s ease 0.12s both;
 }
 .auth-tabs button {
   border: 0;
@@ -390,7 +470,10 @@ body {
   font-weight: 650;
   color: var(--text-dim);
   cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+.auth-tabs button:hover {
+  color: var(--text);
 }
 .auth-tabs button.is-active {
   background: #ffffff;
@@ -400,6 +483,7 @@ body {
 
 .auth-form-head {
   margin-bottom: 1.35rem;
+  animation: auth-field-in 0.55s ease 0.18s both;
 }
 .auth-form-head h2 {
   margin: 0;
@@ -425,7 +509,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  animation: auth-field-in 0.55s ease both;
 }
+.auth-field:nth-child(1) { animation-delay: 0.22s; }
+.auth-field:nth-child(2) { animation-delay: 0.28s; }
+.auth-field:nth-child(3) { animation-delay: 0.34s; }
 .auth-field > span,
 .auth-field-row {
   font-size: 0.78rem;
@@ -453,12 +541,13 @@ body {
   font-size: 1rem;
   color: var(--text);
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 .auth-input:focus {
   background: #ffffff;
   border-color: var(--accent);
   box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
+  transform: translateY(-1px);
 }
 .auth-input::placeholder {
   color: #9aa8b5;
@@ -483,6 +572,7 @@ body {
   cursor: pointer;
   padding: 0.35rem 0.5rem;
   border-radius: 8px;
+  transition: background 0.15s ease;
 }
 .auth-pw-toggle:hover {
   background: var(--accent-soft);
@@ -496,6 +586,7 @@ body {
   background: color-mix(in srgb, var(--bad) 10%, white);
   color: var(--bad);
   border: 1px solid color-mix(in srgb, var(--bad) 28%, transparent);
+  animation: auth-field-in 0.35s ease both;
 }
 
 .auth-submit {
@@ -511,11 +602,15 @@ body {
   color: #ecfdf5;
   box-shadow: 0 10px 24px rgba(15, 118, 110, 0.28);
   transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  animation: auth-field-in 0.55s ease 0.4s both;
 }
 .auth-submit:hover:not(:disabled) {
   background: #0d9488;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   box-shadow: 0 14px 28px rgba(15, 118, 110, 0.32);
+}
+.auth-submit:active:not(:disabled) {
+  transform: translateY(0);
 }
 .auth-submit:disabled {
   opacity: 0.55;
@@ -528,6 +623,7 @@ body {
   text-align: center;
   font-size: 0.85rem;
   color: var(--text-dim);
+  animation: auth-field-in 0.55s ease 0.46s both;
 }
 .auth-switch button {
   border: 0;
@@ -538,6 +634,28 @@ body {
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-brand-wash,
+  .auth-orb,
+  .auth-mark,
+  .auth-display-line,
+  .auth-preview-row,
+  .auth-preview-bar i,
+  .auth-rise,
+  .auth-tabs,
+  .auth-form-head,
+  .auth-field,
+  .auth-submit,
+  .auth-switch,
+  .auth-eyebrow,
+  .auth-display,
+  .auth-lede,
+  .auth-brand-top,
+  .auth-brand-foot {
+    animation: none !important;
+  }
 }
 
 /* Desktop / tablet: true split */
